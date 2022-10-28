@@ -16,6 +16,7 @@ logdir = config["datadir"] + "/logs"
 
 rna_repo = config["rna_repo"]
 rna_scriptdir = rna_repo + "/scripts"
+library_tsv=inputs + "/libraries.tsv"
 
 rna_libraries = pd.read_table(inputs + "/libraries.tsv")
 rna_libraries["path"]= inputs + "/" + rna_libraries["basename"]

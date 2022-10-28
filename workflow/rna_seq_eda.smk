@@ -26,7 +26,7 @@ rule all_rna_eda:
         rdata = analysis + "/{experiment}_eda.rdata",
     params:
         factor_str = factor_str,
-        library_tsv = inputs + "/libraries.tsv",
+        library_tsv = library_tsv,
         script = rna_scriptdir + "/all_rna_eda.R",
     shell:
         """

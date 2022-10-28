@@ -73,7 +73,7 @@ rule all_rna_eda:
         rdata = analysis + "/{experiment}_eda.rdata",
     params:
         factor_str = factor_str,
-        library_tsv = inputs + "/libraries.tsv",
+        library_tsv = library_tsv,
         script = rna_scriptdir + "/all_rna_eda.R",
     shell:
         """
@@ -239,6 +239,7 @@ logdir = config["datadir"] + "/logs"
 
 rna_repo = config["rna_repo"]
 rna_scriptdir = rna_repo + "/scripts"
+library_tsv=inputs + "/libraries.tsv"
 #+end_src
 **** Functions, miscellaneous
 #+begin_src snakemake
@@ -260,7 +261,7 @@ rna_lib_dict = dict(zip(rna_library_indict, rna_file_indict))
 BULK_RNA_LIBS = list(rna_lib_dict.keys())
 
 #+end_src
-**** INPROCESS All rule
+**** All rule
 #+begin_src snakemake
 rule all:
     input:
@@ -362,7 +363,8 @@ CLOSED: [2022-10-26 Wed 13:48]
 *** Prerequisites for local integration testing
 - See configuation file (./config/int_test.yaml) for required parameters and versioned singularity container
 *** Changelog
-- [2022-10-28 Fri] Basic edgeR run
+- [2022-10-28 Fri] Stable 1.0.1 libraries_tsv naming abstracted
+- [2022-10-28 Fri] Stable 1.0.0 Basic edgeR run
 
 ** Development :dev:
 *** Version 1.0.0
