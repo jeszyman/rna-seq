@@ -1,28 +1,34 @@
-print("Integration testing snakefile for bulk RNA-seq\n")
+#########1#########2#########3#########4#########5#########6#########7#########8
+###                                                                          ###
+###               Integration Testing Snakefile for RNA-seq                  ###
+###                                                                          ###
+#########1#########2#########3#########4#########5#########6#########7#########8
 
-# Import common packages
+##################################
+###   Load Required Packages   ###
+##################################
+
+import numpy as np
+import os
 import pandas as pd
 import re
-import numpy as np
 
+###########################
+###   Variable Naming   ###
+###########################
 
+# Names directly from configuration YAML
+threads = config['threads']
 
+# Names build from configuration parameter base
+rna_script_dir = config['rna_repo'] + "/scripts"
 
-
-rule all:
-    input:
-        expand(salmon + "/{library}.quant.sf", library = BULK_RNA_LIBS)
-
-rule symlink_salmon:
-    container: rna_container
-    input: lambda wildcards: bulk_rna_lib_dict[wildcards.librfary],
-    log: logdir + "/{library}_symlink_salmon.log",
-    output: salmon = "/{library}.quant.sf",
+rule dumbtest:
+    output: "/tmp/test2.tsv",
     params:
-        script = rna_scriptdir + "/symlink_salmon.sh"
+        script = rna_script_dir + "/dumbtest.R"
     shell:
         """
-        {params.script} {input} {ouput} &> {log}
+        Rscript {params.script} \
+        {output}
         """
-
-include: " <INCLUDE FILE LOCATION (VIA CONFIG PARAM)>"

@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 
+
 args = commandArgs(trailingOnly = TRUE)
 in_salmon_str = args[1]
 out_txi = args[2]

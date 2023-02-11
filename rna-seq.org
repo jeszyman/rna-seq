@@ -4,26 +4,50 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes
 :header-args+: :noweb yes
 :END:
+http://refgenomes.databio.org/v3/assets/archive/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4/salmon_partial_sa_index?tag=default
+** Repository setup and administration
+*** Bash preamble
+*** Setup
+- get test data
+  #+begin_src bash
+repo=~/repos/rna-seq
+# get salmon files
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/1-ir.AACATCTCGA-TATTCGCCAG/1-ir.AACATCTCGA-TATTCGCCAG.quant.sf ${repo}/test/inputs/exp1.quant.sf
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/2-ir.GTAACGTCAC-ACCAACTAAG/2-ir.GTAACGTCAC-ACCAACTAAG.quant.sf ${repo}/test/inputs/exp2.quant.sf
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/3-ir.GCTAACCGTG-TCACCATAAG/3-ir.GCTAACCGTG-TCACCATAAG.quant.sf ${repo}/test/inputs/expsample3.quant.sf
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/10-ct.TCATCCGTGA-TTAGGAGGAA/10-ct.TCATCCGTGA-TTAGGAGGAA.quant.sf ${repo}/test/inputs/ctrl.quant.sf
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/9-ct.TCCAGAATGT-TGGTCCAATT/9-ct.TCCAGAATGT-TGGTCCAATT.quant.sf ${repo}/test/inputs/ctrl2.quant.sf
+
+cp ~/card/inputs/Rentschler_s4630_MGI0042/8-ct.CCGAACATGT-ACCTCATTGA/8-ct.CCGAACATGT-ACCTCATTGA.quant.sf ${repo}/test/inputs/normal.quant.sf
+#+end_src
+- file:test/inputs/libraries.tsv
+  | library | basename            | participant | run  | group |
+  |---------+---------------------+-------------+------+-------|
+  | lib001  | ctrl.quant.sf       | subj001     | seq1 | ctrl  |
+  | lib002  | ctrl2.quant.sf      | subj002     | seq2 | ctrl  |
+  | lib003  | normal.quant.sf     | subj003     | seq1 | ctrl  |
+  | lib004  | exp1.quant.sf       | subj004     | seq2 | exp   |
+  | lib005  | exp2.quant.sf       | subj005     | seq1 | exp   |
+  | lib006  | expsample3.quant.sf | subj006     | seq2 | exp   |
 ** Bulk RNA-seq Exploratory Data Analysis                               :smk:
 :PROPERTIES:
 :header-args:snakemake: :tangle ./workflow/rna_seq_eda.smk
 :END:
-*** Preamble
-#+begin_src snakemake
-
-#+end_src
-
 *** Make txi counts from salmon files                              :smk_rule:
 - Snakemake
   #+begin_src snakemake
 rule make_salmon_txi:
-    container: rna_container,
-    input: expand(salmon + "/{library}.quant.sf", library = BULK_RNA_LIBS),
+    input: expand(salmon_dir + "/{library}.sf", library = RNA_LIBS),
     log: logdir + "/{experiment}_make_salmon_txi.log",
-    output: analysis + "/{experiment}_txi.rdata",
+    output: rna_dir + "/{experiment}_txi.rdata",
     params:
-        script = rna_scriptdir + "/make_salmon_txi.R",
-        txdb = "TxDb.Mmusculus.UCSC.mm10.ensGene",
+        script = rna_script_dir + "/make_salmon_txi.R",
+        txdb = txdb,
     shell:
         """
         Rscript {params.script} \
@@ -36,6 +60,7 @@ rule make_salmon_txi:
 - [[file:./workflow/scripts/make_salmon_txi.R][Rscript]]
   #+begin_src R :noweb yes :tangle ./scripts/make_salmon_txi.R
 #!/usr/bin/env Rscript
+
 
 args = commandArgs(trailingOnly = TRUE)
 in_salmon_str = args[1]
@@ -177,41 +202,114 @@ save_plot(pca_plot, file = pca_plot_pdf)
 :PROPERTIES:
 :header-args:snakemake: :tangle no
 :END:
-** Integration testing
-*** Setup
-- get test data
-  #+begin_src bash
-repo=~/repos/rna-seq
-# get salmon files
+** Snakemake conda environment yaml
+:PROPERTIES:
+:header-args:bash: :tangle ./config/rna_env.yaml
+:END:
+#+begin_src bash
 
-cp ~/card/inputs/Rentschler_s4630_MGI0042/1-ir.AACATCTCGA-TATTCGCCAG/1-ir.AACATCTCGA-TATTCGCCAG.quant.sf ${repo}/test/inputs/exp1.quant.sf
+name: rna
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - bioconductor-deseq2
+  - bioconductor-txdb.hsapiens.ucsc.hg38.knowngene
+  - bioconductor-tximport
+  - r-tidyverse
 
-cp ~/card/inputs/Rentschler_s4630_MGI0042/2-ir.GTAACGTCAC-ACCAACTAAG/2-ir.GTAACGTCAC-ACCAACTAAG.quant.sf ${repo}/test/inputs/exp2.quant.sf
-
-cp ~/card/inputs/Rentschler_s4630_MGI0042/3-ir.GCTAACCGTG-TCACCATAAG/3-ir.GCTAACCGTG-TCACCATAAG.quant.sf ${repo}/test/inputs/expsample3.quant.sf
-
-cp ~/card/inputs/Rentschler_s4630_MGI0042/10-ct.TCATCCGTGA-TTAGGAGGAA/10-ct.TCATCCGTGA-TTAGGAGGAA.quant.sf ${repo}/test/inputs/ctrl.quant.sf
-
-cp ~/card/inputs/Rentschler_s4630_MGI0042/9-ct.TCCAGAATGT-TGGTCCAATT/9-ct.TCCAGAATGT-TGGTCCAATT.quant.sf ${repo}/test/inputs/ctrl2.quant.sf
-
-cp ~/card/inputs/Rentschler_s4630_MGI0042/8-ct.CCGAACATGT-ACCTCATTGA/8-ct.CCGAACATGT-ACCTCATTGA.quant.sf ${repo}/test/inputs/normal.quant.sf
 #+end_src
-- file:test/inputs/libraries.tsv
-  | library | basename            | participant | run  | group |
-  |---------+---------------------+-------------+------+-------|
-  | lib001  | ctrl.quant.sf       | subj001     | seq1 | ctrl  |
-  | lib002  | ctrl2.quant.sf      | subj002     | seq2 | ctrl  |
-  | lib003  | normal.quant.sf     | subj003     | seq1 | ctrl  |
-  | lib004  | exp1.quant.sf       | subj004     | seq2 | exp   |
-  | lib005  | exp2.quant.sf       | subj005     | seq1 | exp   |
-  | lib006  | expsample3.quant.sf | subj006     | seq2 | exp   |
-*** Configuration YAML
+** Snakemake configuration YAML
 #+begin_src bash :tangle ./config/int_test.yaml
+experiment_id: inttest_human
+txdb: "TxDb.Mmusculus.UCSC.mm10.ensGene",
+threads: 4
 rna_container: "/home/jeszyman/sing_containers/rna.1.2.0.sif"
 datadir: "test"
 rna_repo: "/home/jeszyman/repos/rna-seq"
 factor_str: "run group"
 #+end_src
+** [[file:workflow/int_test.smk][Integration testing]] :smk:
+:PROPERTIES:
+:header-args:snakemake: :tangle ./workflow/int_test.smk
+:END:
+*** Preamble
+#+begin_src snakemake
+#########1#########2#########3#########4#########5#########6#########7#########8
+###                                                                          ###
+###               Integration Testing Snakefile for RNA-seq                  ###
+###                                                                          ###
+#########1#########2#########3#########4#########5#########6#########7#########8
+
+##################################
+###   Load Required Packages   ###
+##################################
+
+import numpy as np
+import os
+import pandas as pd
+import re
+
+#+end_src
+*** Variable naming
+#+begin_src snakemake
+
+###########################
+###   Variable Naming   ###
+###########################
+
+# Names directly from configuration YAML
+threads = config['threads']
+
+# Names build from configuration parameter base
+rna_script_dir = config['rna_repo'] + "/scripts"
+#+end_src
+*** Functions
+#+begin_src snakemake
+RNA_LIBS = ["lib001", "lib002", "lib003", "lib004"]
+#+end_src
+*** All rule
+#+begin_src snakemake
+rule all:
+    input:
+        analysis + "/{experiment}_txi.rdata",
+rule dumbtest:
+    output: "/tmp/test2.tsv",
+    params:
+        script = rna_script_dir + "/dumbtest.R"
+    shell:
+        """
+        Rscript {params.script} \
+        {output}
+        """
+#+end_src
+- [[file:./scripts/dumbtest.R][Rscript]]
+  #+begin_src R :tangle ./scripts/dumbtest.R
+#!/usr/bin/env Rscript
+
+############
+###      ###
+############
+
+# For unit testing
+
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+out= args[1]
+
+# Load required packages
+library(tidyverse)
+
+test = data.frame(top=c(1,2,3),
+                  bottom=c('a','b','c'))
+
+test2 = as_tibble(test)
+
+write_tsv(test2, file = out)
+#+end_src
+*** Benchmark aggregation
+*** Includes statements
 *** Bulk RNA-seq Exploratory Data Analysis Integration Testing :smk:
 :PROPERTIES:
 :header-args:snakemake: :tangle ./workflow/rna_seq_eda_int.smk

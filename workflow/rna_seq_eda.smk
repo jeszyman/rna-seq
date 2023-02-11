@@ -1,13 +1,10 @@
-
-
 rule make_salmon_txi:
-    container: rna_container,
-    input: expand(salmon + "/{library}.quant.sf", library = BULK_RNA_LIBS),
+    input: expand(salmon_dir + "/{library}.quant.sf", library = RNA_LIBS),
     log: logdir + "/{experiment}_make_salmon_txi.log",
     output: analysis + "/{experiment}_txi.rdata",
     params:
-        script = rna_scriptdir + "/make_salmon_txi.R",
-        txdb = "TxDb.Mmusculus.UCSC.mm10.ensGene",
+        script = rna_script_dir + "/make_salmon_txi.R",
+        txdb = txdb,
     shell:
         """
         Rscript {params.script} \
