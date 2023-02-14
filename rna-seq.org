@@ -7,6 +7,9 @@
 http://refgenomes.databio.org/v3/assets/archive/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4/salmon_partial_sa_index?tag=default
 ** Repository setup and administration
 *** Bash preamble
+*** prebuilt salmon refs
+http://refgenomes.databio.org/v3/genomes/splash/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4
+
 *** Setup
 - get test data
   #+begin_src bash
