@@ -1,7 +1,7 @@
 rule pe_rna_seq_fastqc:
-    input: f"{pe_rna_fastq_dir}/{{library}}_{{read}}.fastq.gz",
+    input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{qc_dir}/{{library}}_{{read}}_fastqc.zip",
+    output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
     params:
         out_dir = qc_dir,
         script = f"{rna_script_dir}/rna_seq_fastqc.sh",

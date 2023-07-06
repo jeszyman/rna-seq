@@ -1,5 +1,5 @@
 experiment_id: inttest_human
-txdb = "TxDb.Mmusculus.UCSC.mm10.ensGene",
+txdb: "TxDb.Mmusculus.UCSC.mm10.ensGene",
 threads: 4
 rna_container: "/home/jeszyman/sing_containers/rna.1.2.0.sif"
 datadir: "test"

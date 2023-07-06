@@ -39,8 +39,36 @@ cp ~/card/inputs/Rentschler_s4630_MGI0042/8-ct.CCGAACATGT-ACCTCATTGA/8-ct.CCGAAC
   | lib006  | expsample3.quant.sf | subj006     | seq2 | exp   |
 ** Bulk RNA-seq Exploratory Data Analysis                               :smk:
 :PROPERTIES:
-:header-args:snakemake: :tangle ./workflow/rna_seq_eda.smk
+:header-args:snakemake: :tangle ./workflow/rna.smk
 :END:
+*** PE FastQC
+#+begin_src snakemake
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
+    params:
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+#+end_src
+#+begin_src bash :tangle ./scripts/rna_seq_fastqc.sh
+input="${1}"
+outdir="${2}"
+threads="${3}"
+
+fastqc  --outdir $outdir \
+        --quiet \
+        --threads $threads $input
+
+#+end_src
+
 *** Make txi counts from salmon files                              :smk_rule:
 - Snakemake
   #+begin_src snakemake
