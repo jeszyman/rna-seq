@@ -17,4 +17,4 @@ jobs:
 
     - name: Create Conda Environment
       run: |
-        mamba env create -f ./config/rna_env.yaml
+        mamba env update -f ./config/rna_env.yaml
