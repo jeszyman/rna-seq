@@ -4,23 +4,22 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v2
       with:
-        python-version: '3.x'
+        miniconda-version: "latest"
 
-    - name: Install dependencies
+    - name: Create Conda Environment
       run: |
-        python -m pip install --upgrade pip
-        pip install snakemake
+        conda env create -f ./config/rna_env.yaml
 
     - name: Run Snakemake
       run: |
+        conda activate rna
         cd workflow
         snakemake -s rna.smk
