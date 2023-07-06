@@ -1,4 +1,5 @@
-rule pe_rna_seq_fastqc:
+rule rna_seq_fastqc:
+    conda: "rna"
     input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
     output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
@@ -11,6 +12,16 @@ rule pe_rna_seq_fastqc:
         {params.script} \
         {input} \
         {params.out_dir} {params.threads} &> {log}
+        """
+
+rule make_ensembl_de_gtf:
+    conda: "rna",
+    input:  f"{ref_dir}/{{build}}.gtf.gz",
+    log:    f"{log_dir}/{{build}}_make_ensembl_de_gtf.log",
+    output: f"{ref_dir}/{{build}}_protein_coding.gtf",
+    shell:
+        """
+        zcat {input} | grep "protein_coding" > {output} 2> {log}
         """
 
 rule make_salmon_txi:

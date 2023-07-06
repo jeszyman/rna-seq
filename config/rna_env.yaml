@@ -1,9 +1,39 @@
 name: rna
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
+
 dependencies:
+  - bedops
+  - bedtools
+  - bioconductor-GenomicRanges
+  - bioconductor-orthology.eg.db
+  - bioconductor-TxDb.Mmusculus.UCSC.mm10.ensGene
+  - bioconductor-TxDb.Hsapiens.UCSC.hg38.knownGene
+  - bioconductor-TxDb.Mmusculus.UCSC.mm10.knownGene
+  - bioconductor-complexheatmap
   - bioconductor-deseq2
-  - bioconductor-txdb.hsapiens.ucsc.hg38.knowngene
+  - bioconductor-edger
+  - bioconductor-fgsea
+  - bioconductor-ruvseq
+  - bioconductor-rsamtools
   - bioconductor-tximport
+  - bowtie2
+  - fastp
+  - fastqc
+  - multiqc
+  - pandas
+  - parallel
+  - r-magick
+  - r-ggrepel
+  - r-ggextra
+  - r-ggsci
+  - r-msigdbr
+  - r-pheatmap
+  - r-rstatix
+  - r-ggpattern
   - r-tidyverse
+  - r-yaml
+  - rseqc
+  - samtools
+  - snakemake
