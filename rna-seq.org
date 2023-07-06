@@ -26,12 +26,6 @@ jobs:
     - name: Create Conda Environment
       run: |
         conda env create -f ./config/rna_env.yaml
-
-    - name: Run Snakemake
-      run: |
-        conda activate rna
-        cd workflow
-        snakemake -s rna.smk
 #+end_src
 
 *** Conda environmental YAMLs
