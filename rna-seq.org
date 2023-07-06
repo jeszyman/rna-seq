@@ -6,7 +6,7 @@
 :END:
 ** Repository administration
 *** Github continuous integration
-#+begin_src bash :tangle ./.github/test.yml
+#+begin_src bash :tangle ./.github/workflows/test.yml
 name: Snakemake CI
 
 on: [push, pull_request]
