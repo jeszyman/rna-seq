@@ -23,6 +23,11 @@ threads = config['threads']
 # Names build from configuration parameter base
 rna_script_dir = config['rna_repo'] + "/scripts"
 
+RNA_LIBS = ["lib001", "lib002", "lib003", "lib004"]
+
+rule all:
+    input:
+        analysis + "/{experiment}_txi.rdata",
 rule dumbtest:
     output: "/tmp/test2.tsv",
     params:

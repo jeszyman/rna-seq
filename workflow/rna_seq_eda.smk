@@ -1,7 +1,22 @@
+rule pe_rna_seq_fastqc:
+    input: f"{pe_rna_fastq_dir}/{{library}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_{{read}}_fastqc.zip",
+    params:
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+
 rule make_salmon_txi:
-    input: expand(salmon_dir + "/{library}.quant.sf", library = RNA_LIBS),
+    input: expand(salmon_dir + "/{library}.sf", library = RNA_LIBS),
     log: logdir + "/{experiment}_make_salmon_txi.log",
-    output: analysis + "/{experiment}_txi.rdata",
+    output: rna_dir + "/{experiment}_txi.rdata",
     params:
         script = rna_script_dir + "/make_salmon_txi.R",
         txdb = txdb,
