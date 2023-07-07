@@ -1,6 +1,22 @@
-rule rna_seq_fastqc:
+rule pe_rna_seq_fastqc:
     conda: "rna"
     input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
+    params:
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+
+rule se_rna_seq_fastqc:
+    conda: "rna"
+    input: f"{rna_dir}/fastqs/se/{{library}}_raw_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
     output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
     params:

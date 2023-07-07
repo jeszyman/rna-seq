@@ -4,6 +4,30 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes
 :header-args+: :noweb yes
 :END:
+
+#+NAME: my-bash-commands
+#+BEGIN_SRC sh :tangle /tmp/my_commands.sh
+#!/bin/bash
+set -x
+cd ~/repos/
+ls
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  ;; Create a new vterm window.
+  (let ((current-prefix-arg '(4)))  ; simulate pressing C-u
+    (call-interactively 'vterm))    ; execute M-x vterm
+  ;; Rename the buffer.
+  (rename-buffer "TEST" t)          ; The t parameter forces the renaming even if a buffer named "TEST" already exists.
+  ;; Run the shell script.
+  (vterm-send-string "/tmp/my_commands.sh")
+  (vterm-send-return)
+  ;; Delay switching to the "TEST" buffer in the same window.
+  (run-with-timer 0.1 nil
+                  (lambda ()
+                    (pop-to-buffer-same-window "TEST")))
+#+END_SRC
+
 ** Repository administration
 *** Github continuous integration
 #+begin_src bash :tangle ./.github/workflows/test.yml
@@ -345,11 +369,29 @@ rule symlink_rnaseq_de_inputs:
 :header-args:snakemake: :tangle ./workflow/rna.smk
 :END:
 *** Quality control
-**** FastQC
+**** Paried end FastQC
 #+begin_src snakemake
-rule rna_seq_fastqc:
+rule pe_rna_seq_fastqc:
     conda: "rna"
     input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
+    params:
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+#+end_src
+
+#+begin_src snakemake
+rule se_rna_seq_fastqc:
+    conda: "rna"
+    input: f"{rna_dir}/fastqs/se/{{library}}_raw_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{read}}_rna_seq_fastqc.log",
     output: f"{qc_dir}/{{library}}_raw_{{read}}_fastqc.zip",
     params:
