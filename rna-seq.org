@@ -370,7 +370,7 @@ rule symlink_rnaseq_de_inputs:
 :END:
 *** Quality control
 **** Paried end FastQC
-#+begin_src snakemake
+#+begin_src snakemake :tangle no
 rule pe_rna_seq_fastqc:
     conda: "rna"
     input: f"{rna_dir}/fastqs/pe/{{library}}_raw_{{read}}.fastq.gz",
@@ -388,7 +388,7 @@ rule pe_rna_seq_fastqc:
         """
 #+end_src
 
-#+begin_src snakemake
+#+begin_src snakemake :tangle no
 rule se_rna_seq_fastqc:
     conda: "rna"
     input: f"{rna_dir}/fastqs/se/{{library}}_raw_{{read}}.fastq.gz",
