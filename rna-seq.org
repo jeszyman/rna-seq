@@ -4,30 +4,6 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes
 :header-args+: :noweb yes
 :END:
-
-#+NAME: my-bash-commands
-#+BEGIN_SRC sh :tangle /tmp/my_commands.sh
-#!/bin/bash
-set -x
-cd ~/repos/
-ls
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  ;; Create a new vterm window.
-  (let ((current-prefix-arg '(4)))  ; simulate pressing C-u
-    (call-interactively 'vterm))    ; execute M-x vterm
-  ;; Rename the buffer.
-  (rename-buffer "TEST" t)          ; The t parameter forces the renaming even if a buffer named "TEST" already exists.
-  ;; Run the shell script.
-  (vterm-send-string "/tmp/my_commands.sh")
-  (vterm-send-return)
-  ;; Delay switching to the "TEST" buffer in the same window.
-  (run-with-timer 0.1 nil
-                  (lambda ()
-                    (pop-to-buffer-same-window "TEST")))
-#+END_SRC
-
 ** Repository administration
 *** Github continuous integration
 #+begin_src bash :tangle ./.github/workflows/test.yml
@@ -368,8 +344,9 @@ rule symlink_rnaseq_de_inputs:
 :PROPERTIES:
 :header-args:snakemake: :tangle ./workflow/rna.smk
 :END:
-*** Quality control
-**** Paried end FastQC
+*** Workflow 1
+**** Quality control
+***** Paried end FastQC
 #+begin_src snakemake :tangle no
 rule pe_rna_seq_fastqc:
     conda: "rna"
@@ -415,8 +392,6 @@ fastqc  --outdir $outdir \
         --threads $threads $input
 
 #+end_src
-**** RSeQC
-- https://chat.openai.com/share/a7df0ab7-9c10-42a0-bee5-1e7c7505218d
 **** Make ensembl protein-coding GTF for DE
 #+begin_src snakemake
 rule make_ensembl_de_gtf:
@@ -585,10 +560,12 @@ save(design, formula, logCPM, pca, pca_plot, y, file = out_rdata)
 
 save_plot(pca_plot, file = pca_plot_pdf)
 #+end_src
-*** Dev
+*** Development
 :PROPERTIES:
 :header-args:snakemake: :tangle no
 :END:
+**** RSeQC
+- https://chat.openai.com/share/a7df0ab7-9c10-42a0-bee5-1e7c7505218d
 *** Ideas
 :PROPERTIES:
 :header-args:snakemake: :tangle no
