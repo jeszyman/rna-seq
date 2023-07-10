@@ -405,24 +405,39 @@ rule make_ensembl_de_gtf:
         zcat {input} | grep "protein_coding" > {output} 2> {log}
         """
 #+end_src
-*** Make TxDb object from protein-coding GTF
+**** Make TxDb object from protein-coding GTF
 
-Salmon files from GTAC are incompatible with Bioconductor TxDb packages.
+Salmon files from GTAC are incompatible with Bioconductor TxDb packages. Here TxDbs are made from protein coding GTF files.
+Note: The saveDb command makes a timeout error on writing the TxDb, thus the additional cp from tmp step (see https://support.bioconductor.org/p/9136286/).
 
 #+begin_src snakemake
 rule make_txdb_from_gtf:
-    input: f"{ref_dir}/{{build}}_protein.gtf",
+    conda: "rna",
+    input: f"{ref_dir}/{{build}}_protein_coding.gtf",
     log: f"{log_dir}/{{build}}_make_txdb_from_gtf.log",
-    output: f"{ref_dir}/{{build}}_protein_txdb",
-    params: script = f"{rna_scriptdir}/make_txdb_from_gtf.R",
+    output: f"{ref_dir}/{{build}}_protein.txdb",
+    params: script = f"{rna_script_dir}/make_txdb_from_gtf.R",
     shell:
         """
-        Rscript {params.script} \
-        {input} \
-        {output} \
-        > {log} 2>&1
+        Rscript {params.script} {input} {wildcards.build} > {log} 2>&1
+        cp /tmp/{wildcards.build}_protein.txdb {output}
         """
 #+end_src
+
+#+begin_src R :tangle ./scripts/make_txdb_from_gtf.R
+args = commandArgs(trailingOnly = TRUE)
+gtf = args[1]
+build = args[2]
+
+library(GenomicFeatures)
+
+txdb = makeTxDbFromGFF(gtf)
+
+saveDb(txdb, file = paste0("/tmp/",build,"_protein.txdb"))
+
+#+end_src
+
+
 
 *** Make txi counts from salmon files                              :smk_rule:
 - Snakemake

@@ -9,16 +9,15 @@ rule make_ensembl_de_gtf:
         """
 
 rule make_txdb_from_gtf:
-    input: f"{ref_dir}/{{build}}_protein.gtf",
+    conda: "rna",
+    input: f"{ref_dir}/{{build}}_protein_coding.gtf",
     log: f"{log_dir}/{{build}}_make_txdb_from_gtf.log",
-    output: f"{ref_dir}/{{build}}_protein_txdb",
-    params: script = f"{rna_scriptdir}/make_txdb_from_gtf.R",
+    output: f"{ref_dir}/{{build}}_protein.txdb",
+    params: script = f"{rna_script_dir}/make_txdb_from_gtf.R",
     shell:
         """
-        Rscript {params.script} \
-        {input} \
-        {output} \
-        > {log} 2>&1
+        Rscript {params.script} {input} {wildcards.build} > {log} 2>&1
+        cp /tmp/{wildcards.build}_protein.txdb {output}
         """
 
 rule make_salmon_txi:
