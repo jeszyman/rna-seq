@@ -8,6 +8,19 @@ rule make_ensembl_de_gtf:
         zcat {input} | grep "protein_coding" > {output} 2> {log}
         """
 
+rule make_txdb_from_gtf:
+    input: f"{ref_dir}/{{build}}_protein.gtf",
+    log: f"{log_dir}/{{build}}_make_txdb_from_gtf.log",
+    output: f"{ref_dir}/{{build}}_protein_txdb",
+    params: script = f"{rna_scriptdir}/make_txdb_from_gtf.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input} \
+        {output} \
+        > {log} 2>&1
+        """
+
 rule make_salmon_txi:
     input: expand(salmon_dir + "/{library}.sf", library = RNA_LIBS),
     log: logdir + "/{experiment}_make_salmon_txi.log",

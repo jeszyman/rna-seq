@@ -393,6 +393,7 @@ fastqc  --outdir $outdir \
 
 #+end_src
 **** Make ensembl protein-coding GTF for DE
+
 #+begin_src snakemake
 rule make_ensembl_de_gtf:
     conda: "rna",
@@ -404,6 +405,25 @@ rule make_ensembl_de_gtf:
         zcat {input} | grep "protein_coding" > {output} 2> {log}
         """
 #+end_src
+*** Make TxDb object from protein-coding GTF
+
+Salmon files from GTAC are incompatible with Bioconductor TxDb packages.
+
+#+begin_src snakemake
+rule make_txdb_from_gtf:
+    input: f"{ref_dir}/{{build}}_protein.gtf",
+    log: f"{log_dir}/{{build}}_make_txdb_from_gtf.log",
+    output: f"{ref_dir}/{{build}}_protein_txdb",
+    params: script = f"{rna_scriptdir}/make_txdb_from_gtf.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input} \
+        {output} \
+        > {log} 2>&1
+        """
+#+end_src
+
 *** Make txi counts from salmon files                              :smk_rule:
 - Snakemake
   #+begin_src snakemake
