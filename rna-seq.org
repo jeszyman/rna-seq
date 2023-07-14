@@ -345,8 +345,9 @@ rule symlink_rnaseq_de_inputs:
 :header-args:snakemake: :tangle ./workflow/rna.smk
 :END:
 *** Workflow 1
-**** Quality control
-***** Paried end FastQC
+**** Per-library processing
+***** Quality control
+****** Paried end FastQC
 #+begin_src snakemake :tangle no
 rule pe_rna_seq_fastqc:
     conda: "rna"
@@ -392,7 +393,50 @@ fastqc  --outdir $outdir \
         --threads $threads $input
 
 #+end_src
-**** Make ensembl protein-coding GTF for DE
+***** Quantify transcripts with salmon
+#+begin_src snakemake
+rule pe_quant_with_salmon:
+    input:
+        index = f"{ref_dir}/{{build}}_salmon",
+        read1 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R1.fastq.gz",
+        read2 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R2.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{build}}_pe_quant_with_salmon.log",
+    output: f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
+    params:
+        out_dir = f"{rna_dir}/salmon/{{library}}_{{build}}",
+        script = f"{rna_script_dir}/pe_quant_with_salmon.sh",
+        threads = 4,
+    shell:
+        """
+        {params.script} \
+        {input.index} \
+        {input.read1} \
+        {input.read2} \
+        {params.out_dir} \
+        {params.threads} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src bash :tangle ./scripts/pe_quant_with_salmon.sh
+#!/usr/bin/env bash
+
+index="${1}"
+read1="${2}"
+read2="${3}"
+out_dir="${4}"
+threads="${5}"
+
+salmon quant \
+       --index $index \
+       --libType A \
+       --mates1 $read1 \
+       --mates2 $read2 \
+       --output $out_dir \
+       --threads $threads
+
+#+end_src
+**** Reference processing
+***** Make ensembl protein-coding GTF for DE
 
 #+begin_src snakemake
 rule make_ensembl_de_gtf:
@@ -405,14 +449,13 @@ rule make_ensembl_de_gtf:
         zcat {input} | grep "protein_coding" > {output} 2> {log}
         """
 #+end_src
-**** Make TxDb object from protein-coding GTF
+***** Make TxDb object from protein-coding GTF
 
 Salmon files from GTAC are incompatible with Bioconductor TxDb packages. Here TxDbs are made from protein coding GTF files.
 Note: The saveDb command makes a timeout error on writing the TxDb, thus the additional cp from tmp step (see https://support.bioconductor.org/p/9136286/).
 
 #+begin_src snakemake
 rule make_txdb_from_gtf:
-    conda: "rna",
     input: f"{ref_dir}/{{build}}_protein_coding.gtf",
     log: f"{log_dir}/{{build}}_make_txdb_from_gtf.log",
     output: f"{ref_dir}/{{build}}_protein.txdb",
@@ -436,58 +479,433 @@ txdb = makeTxDbFromGFF(gtf)
 saveDb(txdb, file = paste0("/tmp/",build,"_protein.txdb"))
 
 #+end_src
+**** Sample group processing for a given subset of libraries by experiment
+***** Create design
 
+Make an experimental design for the list of libraries
 
-
-*** Make txi counts from salmon files                              :smk_rule:
-- Snakemake
-  #+begin_src snakemake
-rule make_salmon_txi:
-    input: expand(salmon_dir + "/{library}.sf", library = RNA_LIBS),
-    log: logdir + "/{experiment}_make_salmon_txi.log",
-    output: rna_dir + "/{experiment}_txi.rdata",
+#+begin_src snakemake
+rule make_dge_design:
+    input:
+        libraries_full = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_make_dge_design.log",
+    output: f"{rna_dir}/{{experiment}}/design.rds",
     params:
-        script = rna_script_dir + "/make_salmon_txi.R",
-        txdb = txdb,
+        formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
+        libs = lambda wildcards: rna_map[wildcards.experiment]['libs'],
+        script = f"{rna_script_dir}/make_dge_design.R",
     shell:
         """
         Rscript {params.script} \
-        "{input}" \
+        {input.libraries_full} \
+        "{params.formula}" \
+        "{params.libs}" \
         {output} \
-        {params.txdb} \
         > {log} 2>&1
         """
 #+end_src
-- [[file:./workflow/scripts/make_salmon_txi.R][Rscript]]
-  #+begin_src R :noweb yes :tangle ./scripts/make_salmon_txi.R
+
+#+begin_src R :tangle ./scripts/make_dge_design.R
 #!/usr/bin/env Rscript
 
+###############################
+###   Make Rna-Seq Design   ###
+###############################
+
+# ---   Command Line Arguements   --- #
+# ----------------------------------- #
 
 args = commandArgs(trailingOnly = TRUE)
-in_salmon_str = args[1]
-out_txi = args[2]
-in_txdb = args[3]
+libraries_full_rds = args[1]
+formula = args[2]
+libs_str = args[3]
+design_rds = args[4]
+
+# ---   Load   --- #
+# ---------------- #
+
+library(tidyverse)
+libraries_full = readRDS(libraries_full_rds)
+libs_vect = strsplit(libs_str, " ")[[1]]
+
+# ---   Run   --- #
+# --------------- #
+
+libs =
+  data.frame(library = libs_vect) %>%
+  left_join(libraries_full) %>%
+  mutate(across(where(is.factor), droplevels))
+
+design = model.matrix(as.formula(formula), data = libs)
+
+rownames(design) = libs$library
+
+saveRDS(object = design,
+        file = design_rds)
+#+end_src
+
+***** Summarize gene-level abundance with txi counts from salmon files :smk_rule:
+
+Annotate and summarize counts for salmon files
+
+#+begin_src snakemake
+
+rule make_salmon_txi:
+    input:
+        salmon = lambda wildcards: expand(f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
+                                          library = rna_map[wildcards.experiment]['libs'],
+                                          build = rna_map[wildcards.experiment]['build']),
+        txdb = lambda wildcards: rna_map[wildcards.experiment]['txdb'],
+    log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
+    output: f"{rna_dir}/{{experiment}}/txi.rds",
+    params:
+        script = rna_script_dir + "/make_salmon_txi.R",
+    shell:
+        """
+        Rscript {params.script} \
+        "{input.salmon}" \
+        {input.txdb} \
+        {output} > {log} 2>&1
+        """
+
+#+end_src
+
+#+begin_src R :tangle ./scripts/make_salmon_txi.R
+#!/usr/bin/env Rscript
+
+args = commandArgs(trailingOnly = TRUE)
+salmon_str = args[1]
+txdb = args[2]
+out_txi = args[3]
 
 # Load libraries
-library(paste(in_txdb), character.only=T)
-txdb = get(in_txdb)
 library(tximport)
+library(AnnotationDbi)
+
+txdb = loadDb(txdb)
 
 # Make salmon file list
-in_salmon_vec = unlist(strsplit(in_salmon_str, " "))
-names(in_salmon_vec) = substr(gsub("^.*lib", "lib", in_salmon_vec), 1, 6)
+salmon_vect = unlist(strsplit(salmon_str, " "))
+names(salmon_vect) = substr(gsub("^.*lib", "lib", salmon_vect), 1, 6)
 
 # Make gene annotation
 k = keys(txdb, keytype = "TXNAME")
 tx2gene = AnnotationDbi::select(txdb, k, "GENEID", "TXNAME")
 
 # Make txi object
-txi = tximport(in_salmon_vec, type = "salmon", tx2gene = tx2gene)
+txi = tximport(salmon_vect, type = "salmon", tx2gene = tx2gene, ignoreTxVersion = T, ignoreAfterBar = T)
 
 # Save txi object
-save(txi, file = out_txi)
+saveRDS(txi, file = out_txi)
 #+end_src
-*** INPROCESS All sample EDA                                       :smk_rule:
+***** Normalize txi counts across the experimental design
+#+begin_src snakemake
+rule norm_txi:
+    input:
+        design = f"{rna_dir}/{{experiment}}/design.rds",
+        txi = f"{rna_dir}/{{experiment}}/txi.rds",
+    log: f"{log_dir}/{{experiment}}_norm_txi.log",
+    output:
+        dge = f"{rna_dir}/{{experiment}}/dge.rds",
+        glm = f"{rna_dir}/{{experiment}}/fit.rds",
+        cpm = f"{rna_dir}/{{experiment}}/cpm.tsv",
+    params: script = f"{rna_script_dir}/norm_txi.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input.design} \
+        {input.txi} \
+        {output.dge} \
+        {output.glm} \
+        {output.cpm} \
+        > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/norm_txi.R
+#!/usr/bin/env Rscript
+
+#######################
+###   Human Edger   ###
+#######################
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+design_rds = args[1]
+txi_rds = args[2]
+dge_rds = args[3]
+glm_rds = args[4]
+logcpm_tsv = args[5]
+
+# Load required packages, data, and functions
+library(edgeR)
+library(tidyverse)
+
+design = readRDS(design_rds)
+txi = readRDS(txi_rds)
+
+# Make a DGE List
+#  See https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html
+make_dge_list = function(txi, design){
+  cts <- txi$counts
+  normMat <- txi$length
+  # Obtaining per-observation scaling factors for length, adjusted to avoid
+  # changing the magnitude of the counts.
+  normMat <- normMat/exp(rowMeans(log(normMat)))
+  normCts <- cts/normMat
+  # Computing effective library sizes from scaled counts, to account for
+  # composition biases between samples.
+  eff.lib <- calcNormFactors(normCts) * colSums(normCts)
+  # Combining effective library sizes with the length factors, and calculating
+  # offsets for a log-link GLM.
+  normMat <- sweep(normMat, 2, eff.lib, "*")
+  normMat <- log(normMat)
+  # Creating a DGEList object for use in edgeR.
+  y <- DGEList(cts)
+  keep = filterByExpr(y, design)
+  y = y[keep, ]
+  return(y)
+}
+
+y = make_dge_list(txi, design)
+
+logcpm = edgeR::cpm(y, normalized.lib.sizes = TRUE, log = TRUE, prior.count = 2)
+
+y = estimateDisp(y,design)
+fit <- glmQLFit(y,design)
+
+saveRDS(y, dge_rds)
+saveRDS(fit, glm_rds)
+
+logcpm %>% as.data.frame(.) %>% rownames_to_column(var = "ensembl") %>% as_tibble() %>% write_tsv(., file = logcpm_tsv)
+#+end_src
+***** All sample PCA
+#+begin_src snakemake
+rule make_cpm_pca:
+    input:
+        cpm = f"{rna_dir}/{{experiment}}/cpm.tsv",
+        libraries_full = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
+    output:
+        f"{rna_dir}/{{experiment}}/pca.png",
+        f"{rna_dir}/{{experiment}}/pca.svg",
+    params:
+        formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
+        script = f"{rna_script_dir}/make_cpm_pca.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input.cpm} \
+        "{params.formula}" \
+        {input.libraries_full} \
+        {output} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/make_cpm_pca.R
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly = TRUE)
+cpm_tsv = args[1]
+formula = args[2]
+libraries_full_rds = args[3]
+out_png = args[4]
+out_svg = args[5]
+
+factor_str = gsub("~0 +", "", formula)
+factor_vec = strsplit(factor_str, " ")[[1]]
+factor_vec = factor_vec[!factor_vec == "+"]
+
+library(cowplot)
+library(ggrepel)
+library(tidyverse)
+
+cpm = read_tsv(cpm_tsv)
+libraries_full = readRDS(libraries_full_rds)
+
+pca = prcomp(t(as.matrix(cpm[,-1])))
+
+(pve_pc1=round(100*summary(pca)$importance[2,1]))
+
+(pve_pc2=round(100*summary(pca)$importance[2,2]))
+
+plot = as.data.frame(pca$x) %>%
+  rownames_to_column(var = "library") %>%
+  left_join(libraries_full, by = "library") %>%
+  ggplot(., aes(x = PC1, y = PC2, color = get(factor_vec[[1]]), label = library)) +
+  geom_point(size = 4) +
+  geom_text_repel() +
+  scale_color_discrete(name = factor_vec[[1]]) +
+  xlab(paste("PC1, ", pve_pc1, "% variance explained", sep ="")) +
+  ylab(paste("PC2, ", pve_pc2, "% variance explained", sep ="")) +
+  coord_fixed(ratio = 1)
+
+if (length(factor_vec) >= 2 && !is.null(factor_vec[[2]])) {
+  plot = plot +
+    aes(shape = get(factor_vec[[2]])) +
+    scale_shape_discrete(name = factor_vec[[2]])
+}
+
+ggsave(filename = out_png, plot = plot, device = "png", width = 8, height = 6)
+ggsave(filename = out_svg, plot = plot, device = "svg", width = 8, height = 6)
+
+#+end_src
+*** Workflow 2
+Workflow 2 receives a curated list RNA-seq library IDs and associcated experimetnal design for differential gene expression workup.
+**** Create a design matrix for differential expression
+**** EdgeR Differential Expression Constrast
+#+begin_src snakemake
+rule make_edger_contrast_de:
+    input:
+        design = lambda wildcards: dge_map[wildcards.contrast]['design'],
+        fit = lambda wildcards: dge_map[wildcards.contrast]['fit'],
+    log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
+    output: f"{rna_dir}/dge/{{contrast}}.tsv",
+    params:
+        cohorts_str = lambda wildcards: dge_map[wildcards.contrast]['cohorts_str'],
+        script = f"{rna_script_dir}/make_edger_contrast_de.R",
+    shell:
+        """
+        Rscript {params.script} \
+        "{params.cohorts_str}" \
+        {input.design} \
+        {input.fit} \
+        {output} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/make_edger_contrast_de.R
+#!/usr/bin/env Rscript
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+cohorts_str = args[1]
+design_rds = args[2]
+fit_rds = args[3]
+res_tsv = args[4]
+
+# Load required packages, data, and functions
+library(edgeR)
+library(tidyverse)
+
+design = readRDS(design_rds)
+fit = readRDS(fit_rds)
+
+cohorts_vec = strsplit(cohorts_str, " ")[[1]]
+contrast_string <- paste(cohorts_vec[[1]], "-", cohorts_vec[[2]])
+
+contrast <- makeContrasts(eval(parse(text = contrast_string)), levels=design)
+qlf = glmQLFTest(fit, contrast = contrast)
+res = as.data.frame(topTags(qlf, n = Inf)) %>% rownames_to_column(var = "ensembl") %>% as_tibble()
+
+write_tsv(res, file = res_tsv)
+#+end_src
+**** edgeR
+
+
+
+
+*** Development
+:PROPERTIES:
+:header-args:snakemake: :tangle no
+:END:
+**** edgeR
+#+begin_src R :tangle no
+#!/usr/bin/env Rscript
+
+#######################
+###   Human Edger   ###
+#######################
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+libraries_full_rds = args[1]
+txi_rds = args[2]
+design_rds = args[3]
+dge_rds = args[4]
+logcpm_tsv = args[5]
+
+# Load required packages, data, and functions
+library(edgeR)
+library(tidyverse)
+libraries_full = readRDS(libraries_full_rds)
+txi = readRDS(txi_rds)
+
+# Model design
+(libs = data.frame(library = colnames(txi$counts)) %>%
+  left_join(libraries_full) %>% droplevels(.))
+
+libs$cohort=paste0(libs$strain, "_", libs$cohort)
+
+(design <- model.matrix(~ 0 + sex + cohort, data = libs))
+
+#(design <- model.matrix(~ 0 + cohort, data = libs))
+
+#colnames(design) = gsub("cohort","",colnames(design))
+
+# Make a DGE List
+#  See https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html
+make_dge_list = function(txi, design){
+  cts <- txi$counts
+  normMat <- txi$length
+  # Obtaining per-observation scaling factors for length, adjusted to avoid
+  # changing the magnitude of the counts.
+  normMat <- normMat/exp(rowMeans(log(normMat)))
+  normCts <- cts/normMat
+  # Computing effective library sizes from scaled counts, to account for
+  # composition biases between samples.
+  eff.lib <- calcNormFactors(normCts) * colSums(normCts)
+  # Combining effective library sizes with the length factors, and calculating
+  # offsets for a log-link GLM.
+  normMat <- sweep(normMat, 2, eff.lib, "*")
+  normMat <- log(normMat)
+  # Creating a DGEList object for use in edgeR.
+  y <- DGEList(cts)
+  keep = filterByExpr(y, design)
+  y = y[keep, ]
+  return(y)
+}
+
+y = make_dge_list(txi, design)
+
+
+logcpm = edgeR::cpm(y, normalized.lib.sizes = TRUE, log = TRUE, prior.count = 2)
+
+y
+
+y = estimateDisp(y,design)
+
+fit <- glmQLFit(y,design)
+
+
+qlf <- glmQLFTest(fit,coef=2)
+
+res = as.data.frame(topTags(qlf, n = Inf)) %>% rownames_to_column(var = "ensembl") %>% as_tibble()
+
+tail(res)
+
+contrast = makeContrasts(cohortir2d, levels = design)
+
+names(design)
+colnames(design)
+colnames(design) <- gsub(":", ".", colnames(design))
+
+contrast <- makeContrasts(strainsod2.cohortir2d, levels=design)
+
+contrast <- makeContrasts(strainsod2.cohortir2d - strainsod2, levels=design)
+
+qlf = glmQLFTest(fit, contrast = contrast)
+
+res %>% filter(FDR < 0.05) %>% count()
+res
+saveRDS(design, design_rds)
+saveRDS(y, dge_rds)
+logcpm %>% as.data.frame(.) %>% rownames_to_column(var = "ensembl") %>% as_tibble() %>% write_tsv(., file = logcpm_tsv)
+#+end_src
+
+
+**** RSeQC
+- https://chat.openai.com/share/a7df0ab7-9c10-42a0-bee5-1e7c7505218d
+**** All sample EDA                                                :smk_rule:
 - Snakemake
   #+begin_src snakemake
 rule all_rna_eda:
@@ -595,22 +1013,10 @@ save(design, formula, logCPM, pca, pca_plot, y, file = out_rdata)
 
 save_plot(pca_plot, file = pca_plot_pdf)
 #+end_src
-*** Development
-:PROPERTIES:
-:header-args:snakemake: :tangle no
-:END:
-**** RSeQC
-- https://chat.openai.com/share/a7df0ab7-9c10-42a0-bee5-1e7c7505218d
 *** Ideas
 :PROPERTIES:
 :header-args:snakemake: :tangle no
 :END:
-** Transcript quantification with salmon
-- salmon partial sa indexes http://refgenomes.databio.org/v3/assets/archive/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4/salmon_partial_sa_index?tag=default
-
-*** prebuilt salmon refs
-http://refgenomes.databio.org/v3/genomes/splash/2230c535660fb4774114bfa966a62f823fdb6d21acf138d4
-
 ** README
 :PROPERTIES:
 :export_file_name: ./readme.md
