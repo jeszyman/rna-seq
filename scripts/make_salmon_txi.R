@@ -1,26 +1,26 @@
 #!/usr/bin/env Rscript
 
-
 args = commandArgs(trailingOnly = TRUE)
-in_salmon_str = args[1]
-out_txi = args[2]
-in_txdb = args[3]
+salmon_str = args[1]
+txdb = args[2]
+out_txi = args[3]
 
 # Load libraries
-library(paste(in_txdb), character.only=T)
-txdb = get(in_txdb)
 library(tximport)
+library(AnnotationDbi)
+
+txdb = loadDb(txdb)
 
 # Make salmon file list
-in_salmon_vec = unlist(strsplit(in_salmon_str, " "))
-names(in_salmon_vec) = substr(gsub("^.*lib", "lib", in_salmon_vec), 1, 6)
+salmon_vect = unlist(strsplit(salmon_str, " "))
+names(salmon_vect) = substr(gsub("^.*lib", "lib", salmon_vect), 1, 6)
 
 # Make gene annotation
 k = keys(txdb, keytype = "TXNAME")
 tx2gene = AnnotationDbi::select(txdb, k, "GENEID", "TXNAME")
 
 # Make txi object
-txi = tximport(in_salmon_vec, type = "salmon", tx2gene = tx2gene)
+txi = tximport(salmon_vect, type = "salmon", tx2gene = tx2gene, ignoreTxVersion = T, ignoreAfterBar = T)
 
 # Save txi object
-save(txi, file = out_txi)
+saveRDS(txi, file = out_txi)
