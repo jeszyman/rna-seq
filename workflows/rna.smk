@@ -2,22 +2,20 @@ rule pe_rna_seq_fastp:
     input:
         read1 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R1.fastq.gz",
         read2 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R2.fastq.gz",
-    log: f"{log_dir}/{{library}}_pe_rna_seq_fastp.log",
+    log: html = f"{log_dir}/{{library}}_pe_rna_seq_fastp.html",
     output:
         read1 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R1.fastq.gz",
         read2 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R2.fastq.gz",
         failed = f"{rna_dir}/fastqs/pe/{{library}}_failed_fastp.fastq.gz",
         unpaired1 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R1.fastq.gz",
         unpaired2 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R2.fastq.gz",
-        json = f"{qc_dir}/{{library}}_cfdna_wgs_fastp.json",
-        cmd = f"{qc_dir}/{{library}}_cfdna_wgs_fastp.log",
+        json = f"{qc_dir}/{{library}}_fastp.json",
+        cmd = f"{qc_dir}/{{library}}_fastp.log",
     params:
         script = f"{rna_script_dir}/pe_rna_seq_fastp.sh",
-        threads = config['threads'],
+        threads = 4
     resources:
         mem_mb = 500,
-    shell:
-        """
     shell:
         """
         {params.script} \
@@ -31,6 +29,21 @@ rule pe_rna_seq_fastp:
         {output.unpaired1} \
         {output.unpaired2} \
         {params.threads} &> {output.cmd}
+        """
+
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    params:
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
         """
 
 rule pe_quant_with_salmon:
