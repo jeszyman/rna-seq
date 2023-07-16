@@ -15,7 +15,7 @@ rule pe_rna_seq_fastp:
         script = f"{rna_script_dir}/pe_rna_seq_fastp.sh",
         threads = 4
     resources:
-        mem_mb = 500,
+        mem_mb = 500
     shell:
         """
         {params.script} \
@@ -49,8 +49,8 @@ rule pe_rna_seq_fastqc:
 rule pe_quant_with_salmon:
     input:
         index = f"{ref_dir}/{{build}}_salmon",
-        read1 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R1.fastq.gz",
-        read2 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R2.fastq.gz",
+        read1 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R1.fastq.gz",
+        read2 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R2.fastq.gz",
     log: f"{log_dir}/{{library}}_{{build}}_pe_quant_with_salmon.log",
     output: f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
     params:

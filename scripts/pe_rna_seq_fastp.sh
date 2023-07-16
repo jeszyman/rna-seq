@@ -32,6 +32,7 @@ main(){
 
 fastp_wrap(){
     fastp --detect_adapter_for_pe \
+          --disable_quality_filtering \
           --failed_out $output_failed \
           --in1 $input_read1 \
           --in2 $input_read2 \
