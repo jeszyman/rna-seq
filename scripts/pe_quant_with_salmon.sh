@@ -12,4 +12,5 @@ salmon quant \
        --mates1 $read1 \
        --mates2 $read2 \
        --output $out_dir \
-       --threads $threads
+       --threads $threads \
+       --validateMappings
