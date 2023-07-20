@@ -486,7 +486,8 @@ rule pe_quant_with_salmon:
         {input.read1} \
         {input.read2} \
         {params.out_dir} \
-        {params.threads} > {log} 2>&1
+        {params.threads} > {log} 2>&1 &&
+        [[ -s {output[0]} ]] || (echo "Output file is empty: {output[0]}" && exit 1)
         """
 #+end_src
 
