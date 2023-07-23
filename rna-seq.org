@@ -5,6 +5,8 @@
 :header-args+: :noweb yes
 :END:
 ** Repository administration
+*** Emacs
+#+TODO: TODO TEST(t) INPROCESS(p) DEBUG(d) REFACTOR(r) DOCUMENT(d) BLOCKED(b&) WAITING(w&) | DONE DELEGATED
 *** Github continuous integration
 #+begin_src bash :tangle ./.github/workflows/test.yml
 name: Snakemake CI
@@ -80,7 +82,7 @@ dependencies:
 CLOSED: [2022-10-26 Wed 13:48]
 ** Development :dev:
 *** Version 1.0.0
-**** TODO [[id:f6717c79-64ce-4b16-b455-649df2ba20fd][Project stable version update]]
+**** [[id:f6717c79-64ce-4b16-b455-649df2ba20fd][Project stable version update]]
 *** Ideas :ideas:
 - cibersort
 ** Ideas
@@ -606,7 +608,57 @@ salmon quant \
 Workflow 2 receives a curated list RNA-seq library IDs and associcated experimetnal design for differential gene expression workup.
 
 **** [[id:41ccba05-da95-4f0d-b406-1ea6941e03ce][Sample group processing for a given subset of libraries by experiment]]
-**** EdgeR Differential Expression Constrast
+**** Differential gene expression with EdgeR
+***** TEST Likelihood ratio test
+#+begin_src snakemake
+rule make_edger_lrt:
+    input:
+        design = lambda wildcards: lrt_map[wildcards.contrast]['design'],
+        fit = lambda wildcards: lrt_map[wildcards.contrast]['fit'],
+    log: f"{log_dir}/{{contrast}}_make_edger_lrt.log",
+    output: f"{rna_dir}/contrasts/lrt_{{contrast}}/lrt_{{contrast}}.tsv",
+    params: script = f"{rna_script_dir}/make_edger_lrt.R",
+    shell:
+        """
+        Rscript {params.script} {input} {output} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/make_edger_lrt.R
+#!/usr/bin/env Rscript
+#!/usr/bin/env Rscript
+
+########################################################
+###   Make Edger Contrast By Likelihood Ratio Test   ###
+########################################################
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+design_rds = args[1]
+fit_rds = args[2]
+res_tsv = args[3]
+
+# Load required packages, data, and functions
+design = readRDS(design_rds)
+fit = readRDS(fit_rds)
+
+lrt = glmLRT(fit, coef = 2)
+
+
+res =
+  as.data.frame(topTags(lrt, n = Inf)) %>%
+  rownames_to_column(var = "ensembl_gene_id") %>%
+  as_tibble() %>%
+  left_join(annotation, by = "ensembl_gene_id") %>%
+  mutate(sign = sign(logFC)) %>%
+  mutate(score = sign * -log10(PValue)) %>%
+  mutate(rank = rank(-score, ties.method = "random"))
+
+write_tsv(res, file = res_tsv)
+
+#+end_src
+
+***** EdgeR Additive Differential Expression Constrast
 #+begin_src snakemake
 rule make_edger_contrast_de:
     input:
@@ -667,7 +719,23 @@ res =
 write_tsv(res, file = res_tsv)
 
 #+end_src
-**** Volcano plot
+
+example of contrast-specific naming
+
+make_res = function(contrast, fit, contrast_name){
+  res = glmQLFTest(fit, contrast = contrast)
+  res = data.frame(topTags(res, n = Inf)) %>%
+    rownames_to_column(var = "ensembl") %>% as_tibble() %>%
+    rename("logfc" = "logFC",
+           "logcpm" = "logCPM",
+           "pval" = "PValue",
+           "qval" = "FDR") %>%
+    select(!F) %>%
+    rename_with(~paste0(contrast_name, "_", .), -ensembl)
+  return(res)
+}
+
+***** Volcano plot
 #+begin_src snakemake
 rule rna_volcano:
     input: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
@@ -847,18 +915,18 @@ txi = tximport(salmon_vect, type = "salmon", tx2gene = tx2gene, ignoreTxVersion 
 saveRDS(txi, file = out_txi)
 #+end_src
 
-***** Normalize txi counts across the experimental design
+***** Normalize txi counts across the experimental design for use in edgeR
 #+begin_src snakemake
-rule norm_txi:
+rule norm_txi_edger:
     input:
         design = f"{rna_dir}/models/{{experiment}}/{{experiment}}_design.rds",
         txi = f"{rna_dir}/models/{{experiment}}/{{experiment}}_txi.rds",
-    log: f"{log_dir}/{{experiment}}_norm_txi.log",
+    log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}/{{experiment}}_dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_cpm.tsv",
-    params: script = f"{rna_script_dir}/norm_txi.R",
+        dge = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}dge.rds",
+        glm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_fit.rds",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
+    params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
         Rscript {params.script} \
@@ -871,7 +939,7 @@ rule norm_txi:
         """
 #+end_src
 
-#+begin_src R :tangle ./scripts/norm_txi.R
+#+begin_src R :tangle ./scripts/norm_txi_edger.R
 #!/usr/bin/env Rscript
 
 #######################

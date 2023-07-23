@@ -94,6 +94,18 @@ rule pe_quant_with_salmon:
         [[ -s {output[0]} ]] || (echo "Output file is empty: {output[0]}" && exit 1)
         """
 
+rule make_edger_lrt:
+    input:
+        design = lambda wildcards: lrt_map[wildcards.contrast]['design'],
+        fit = lambda wildcards: lrt_map[wildcards.contrast]['fit'],
+    log: f"{log_dir}/{{contrast}}_make_edger_lrt.log",
+    output: f"{rna_dir}/contrasts/lrt_{{contrast}}/lrt_{{contrast}}.tsv",
+    params: script = f"{rna_script_dir}/make_edger_lrt.R",
+    shell:
+        """
+        Rscript {params.script} {input} {output} > {log} 2>&1
+        """
+
 rule make_edger_contrast_de:
     input:
         design = lambda wildcards: dge_map[wildcards.contrast]['design'],
@@ -164,16 +176,16 @@ rule make_salmon_txi:
         {output} > {log} 2>&1
         """
 
-rule norm_txi:
+rule norm_txi_edger:
     input:
         design = f"{rna_dir}/models/{{experiment}}/{{experiment}}_design.rds",
         txi = f"{rna_dir}/models/{{experiment}}/{{experiment}}_txi.rds",
-    log: f"{log_dir}/{{experiment}}_norm_txi.log",
+    log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}/{{experiment}}_dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_cpm.tsv",
-    params: script = f"{rna_script_dir}/norm_txi.R",
+        dge = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}dge.rds",
+        glm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_fit.rds",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
+    params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
         Rscript {params.script} \
