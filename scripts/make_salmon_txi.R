@@ -1,15 +1,16 @@
 #!/usr/bin/env Rscript
 
 args = commandArgs(trailingOnly = TRUE)
-salmon_str = args[1]
-txdb = args[2]
+gtf = args[1]
+salmon_str = args[2]
 out_txi = args[3]
 
 # Load libraries
 library(tximport)
 library(AnnotationDbi)
+library(GenomicFeatures)
 
-txdb = loadDb(txdb)
+txdb = makeTxDbFromGFF(gtf)
 
 # Make salmon file list
 salmon_vect = unlist(strsplit(salmon_str, " "))

@@ -6,7 +6,9 @@ libraries_full_rds = args[3]
 out_png = args[4]
 out_svg = args[5]
 
-factor_str = gsub("~0 +", "", formula)
+factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula)
+factor_str = trimws(factor_str)
+
 factor_vec = strsplit(factor_str, " ")[[1]]
 factor_vec = factor_vec[!factor_vec == "+"]
 
