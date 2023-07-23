@@ -380,6 +380,42 @@ rule pe_rna_seq_fastp:
         {output.failed} \
         {output.unpaired1} \
         {output.unpaired2} \
+        {params.threads} &> {output.cmd} && \
+        [[ -s {output.read1} ]] && [[ -s {output.read2} ]]
+        """
+#+end_src
+
+#+begin_src snakemake :tangle no
+rule pe_rna_seq_fastp:
+    input:
+        read1 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R1.fastq.gz",
+        read2 = f"{rna_dir}/fastqs/pe/{{library}}_raw_R2.fastq.gz",
+    log: html = f"{log_dir}/{{library}}_pe_rna_seq_fastp.html",
+    output:
+        read1 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R1.fastq.gz",
+        read2 = f"{rna_dir}/fastqs/pe/{{library}}_proc_R2.fastq.gz",
+        failed = f"{rna_dir}/fastqs/pe/{{library}}_failed_fastp.fastq.gz",
+        unpaired1 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R1.fastq.gz",
+        unpaired2 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R2.fastq.gz",
+        json = f"{qc_dir}/{{library}}_fastp.json",
+        cmd = f"{qc_dir}/{{library}}_fastp.log",
+    params:
+        script = f"{rna_script_dir}/pe_rna_seq_fastp.sh",
+        threads = 4
+    resources:
+        mem_mb = 500
+    shell:
+        """
+        {params.script} \
+        {input.read1} \
+        {input.read2} \
+        {log.html} \
+        {output.json} \
+        {output.read1} \
+        {output.read2} \
+        {output.failed} \
+        {output.unpaired1} \
+        {output.unpaired2} \
         {params.threads} &> {output.cmd}
         """
 #+end_src
