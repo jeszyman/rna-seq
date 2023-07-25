@@ -386,7 +386,7 @@ rule make_annotation_from_gtf:
         """
         Rscript {params.script} \
         {input} \
-        {params.bmart_data} \
+        "{params.bmart_data}" \
         {output} \
         > {log} 2>&1
         """

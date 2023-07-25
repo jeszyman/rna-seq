@@ -19,7 +19,7 @@ rule make_annotation_from_gtf:
         """
         Rscript {params.script} \
         {input} \
-        {params.bmart_data} \
+        "{params.bmart_data}" \
         {output} \
         > {log} 2>&1
         """
@@ -54,7 +54,8 @@ rule pe_rna_seq_fastp:
         {output.failed} \
         {output.unpaired1} \
         {output.unpaired2} \
-        {params.threads} &> {output.cmd}
+        {params.threads} &> {output.cmd} && \
+        [[ -s {output.read1} ]] && [[ -s {output.read2} ]]
         """
 
 rule pe_rna_seq_fastqc:
