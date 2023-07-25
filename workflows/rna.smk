@@ -139,6 +139,18 @@ rule rna_volcano:
         > {log} 2>&1
         """
 
+rule gsea_from_edger:
+    input: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
+    log: f"{log_dir}/{{contrast}}_{{pathset}}_gsea_from_edger.log",
+    output:
+       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.tsv",
+       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.xlsx",
+    params: script = f"{rna_script_dir}/gsea_from_edger.R",
+    shell:
+        """
+        Rscript {params.script} {input} {wildcards.pathset} {output} > {log} 2>&1
+        """
+
 rule make_dge_design:
     input:
         libraries_full = libraries_full_rds,
@@ -199,7 +211,7 @@ rule norm_txi_edger:
 
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_cpm.tsv",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:

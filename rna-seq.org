@@ -825,6 +825,100 @@ plot = ggplot(table, aes(x = logFC, y = -log10(FDR), label = label)) +
 
 ggsave(plot, file = out_pdf)
 #+end_src
+**** GSEA
+#+begin_src snakemake
+rule gsea_from_edger:
+    input: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
+    log: f"{log_dir}/{{contrast}}_{{pathset}}_gsea_from_edger.log",
+    output:
+       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.tsv",
+       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.xlsx",
+    params: script = f"{rna_script_dir}/gsea_from_edger.R",
+    shell:
+        """
+        Rscript {params.script} {input} {wildcards.pathset} {output} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/gsea_from_edger.R
+# Script to make a gsea table from edgeR results and msigdb pathways
+
+# For unit testing
+## results_file = "/mnt/ris/jschwarz/Active/cardiac-radiobiology/analysis/wtrans/human_ir2w-sham_edger_results.tsv"
+## msig_str = "human_C2_CP:KEGG"
+## enrichment_file = "/tmp/test.tsv"
+
+# Command line arguments
+args = commandArgs(trailingOnly = TRUE)
+
+results_tsv = args[1]
+msig_str = args[2]
+enrichment_tsv = args[3]
+enrichment_xlsx = args[4]
+
+# Load necessary libraries
+library(fgsea)
+library(msigdbr)
+library(tidyverse)
+library(writexl)
+
+results = read_tsv(results_tsv)
+rank_tib = results %>%
+  filter(F > 0) %>%
+  mutate(SN = abs(logFC) / sqrt(1/F)) %>%
+  arrange(desc(SN))
+rank = rank_tib %>% pull(rank)
+names(rank) = rank_tib$ensembl_gene_id
+rank = rank[!duplicated(names(rank))]
+
+msig_vect = as.character(unlist(strsplit(msig_str, "_")))
+
+make_pathway_set = function(msig){
+  # Pull in pathway set from MSigDb
+  if (length(msig) == 2) {
+    tib = msigdbr(msig[1], msig[2])
+  } else {
+    tib = msigdbr(msig[1], msig[2], msig[3])
+  }
+  pathways = split(as.character(tib$ensembl_gene), tib$gs_name)
+  return(pathways)
+}
+
+pathway_set = make_pathway_set(msig_vect)
+
+# str(head(pathway_set))
+
+run_fgsea = function(pathways, stats){
+  gsea = fgseaMultilevel(pathways = pathways,
+                         stats = stats,
+                         scoreType = "pos")
+  gsea = as_tibble(gsea) %>%
+    mutate(leadingEdge = sapply(leadingEdge, paste, collapse = ",")) %>% arrange(padj, pval, -ES)
+  return(gsea)
+}
+
+enrichment = run_fgsea(pathway_set, rank)
+#enrichment
+
+write_tsv(enrichment, enrichment_tsv)
+write_xlsx(enrichment, enrichment_xlsx)
+#+end_src
+***** GSEA
+- Snakemake
+  #+begin_src snakemake :tangle no
+rule gsea:
+    input: wtrans + "/{species}_{contrast}_edger_results.tsv",
+    log: log_dir + "/gsea_{species}_{contrast}_{pathset}.log"
+    output: wtrans + "/{species}_{contrast}_gsea_{pathset}.tsv",
+    params:
+        script = f"{rna_script_dir}/make_gsea.R"
+        pathset = lambda wildcards: dge_map[wildcards.contrast]['pathset']
+    shell:
+        """
+        Rscript {params.script} {input} "{params.pathset}" {output} > {log} 2>&1
+        """
+#+end_src
+- Rscript
 
 *** Shared
 **** Sample group processing for a given subset of libraries by experiment
@@ -1039,7 +1133,7 @@ Makes a logCPM-based PCA plot.
 #+begin_src snakemake
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}/{{experiment}}_cpm.tsv",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
