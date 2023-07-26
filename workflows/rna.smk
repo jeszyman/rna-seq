@@ -156,7 +156,7 @@ rule make_dge_design:
     input:
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_dge_design.log",
-    output: f"{rna_dir}/models/{{experiment}}/{{experiment}}_design.rds",
+    output: f"{rna_dir}/models/{{experiment}}_edger/design.rds",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         libs = lambda wildcards: rna_map[wildcards.experiment]['libs'],
@@ -178,7 +178,7 @@ rule make_salmon_txi:
                                           build = rna_map[wildcards.experiment]['build']),
         gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
     log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
-    output: f"{rna_dir}/models/{{experiment}}/{{experiment}}_txi.rds",
+    output: f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
     params:
         script = rna_script_dir + "/make_salmon_txi.R",
     shell:
@@ -195,9 +195,9 @@ rule norm_txi_edger:
         txi = f"{rna_dir}/models/{{experiment}}/{{experiment}}_txi.rds",
     log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
+        dge = f"{rna_dir}/models/{{experiment}}_edger/dge.rds",
+        glm = f"{rna_dir}/models/{{experiment}}_edger/fit.rds",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
     params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
@@ -216,8 +216,8 @@ rule make_cpm_pca:
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
-        f"{rna_dir}/models/{{experiment}}/{{experiment}}_pca.png",
-        f"{rna_dir}/models/{{experiment}}/{{experiment}}_pca.svg",
+        f"{rna_dir}/models/{{experiment}}_edger/pca.png",
+        f"{rna_dir}/models/{{experiment}}_edger/pca.svg",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
