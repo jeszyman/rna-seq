@@ -191,8 +191,8 @@ rule make_salmon_txi:
 
 rule norm_txi_edger:
     input:
-        design = f"{rna_dir}/models/{{experiment}}/{{experiment}}_design.rds",
-        txi = f"{rna_dir}/models/{{experiment}}/{{experiment}}_txi.rds",
+        design = f"{rna_dir}/models/{{experiment}}_edger/design.rds",
+        txi = f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
     log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
         dge = f"{rna_dir}/models/{{experiment}}_edger/dge.rds",
@@ -212,7 +212,7 @@ rule norm_txi_edger:
 
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}_edger/{{experiment}}_cpm.tsv",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
