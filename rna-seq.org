@@ -2494,7 +2494,7 @@ factor_str: "run group"
 #+end_src
 *** [[file:workflow/int_test.smk][Integration testing]]                                                 :smk:
 :PROPERTIES:
-:header-args:snakemake: :tangle ./workflow/int_test.smk
+:header-args:snakemake: :tangle no
 :END:
 **** Preamble
 #+begin_src snakemake
@@ -2534,7 +2534,7 @@ RNA_LIBS = ["lib001", "lib002", "lib003", "lib004"]
 **** All rule
 
 - [[file:./scripts/dumbtest.R][Rscript]]
-  #+begin_src R :tangle ./scripts/dumbtest.R
+  #+begin_src R :tangle no
 #!/usr/bin/env Rscript
 
 ############
@@ -2562,7 +2562,7 @@ write_tsv(test2, file = out)
 **** Includes statements
 **** Bulk RNA-seq Exploratory Data Analysis Integration Testing         :smk:
 :PROPERTIES:
-:header-args:snakemake: :tangle ./workflow/rna_seq_eda_int.smk
+:header-args:snakemake: :tangle no
 :END:
 ***** Preamble
 #+begin_src snakemake
@@ -2610,7 +2610,7 @@ BULK_RNA_LIBS = list(rna_lib_dict.keys())
 
 #+end_src
 ***** All rule
-#+begin_src snakemake
+
 ***** Symlink inputs                                               :smk_rule:
 - Snakemake
   #+begin_src snakemake
@@ -2635,7 +2635,7 @@ rule symlink_salmon:
         """
 #+end_src
 - Shell
-  #+begin_src bash :tangle ./scripts/symlink_salmon.sh
+  #+begin_src bash :tangle no
 #!/usr/bin/env bash
 set -o errexit   # abort on nonzero exitstatus
 set -o nounset   # abort on unbound variable
@@ -2661,7 +2661,7 @@ include: rna_repo + "/workflow/rna_seq_eda.smk"
 
 **** Post-QC RNA-seq Differential Expression                            :smk:
 :PROPERTIES:
-:header-args:snakemake: :tangle ./workflow/rnaseq_de.smk
+:header-args:snakemake: :tangle no
 :END:
 ***** Preamble
 #+begin_src snakemake
@@ -2714,7 +2714,7 @@ rule symlink_rnaseq_de_inputs:
         """
 #+end_src
 
-#+begin_src R :tangle ./scripts/norm_txi_edger.R
+#+begin_src R :tangle no
 #!/usr/bin/env Rscript
 
 #######################
@@ -2728,7 +2728,7 @@ txi_rds = args[2]
 dge_rds = args[3]
 glm_rds = args[4]
 logcpm_tsv = args[5]
->>>>>>> c610b953b2ad7f0b3b2765aee43e60ee432e8027
+
 
 #+end_src
 ***** Include statements
