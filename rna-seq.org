@@ -2025,6 +2025,7 @@ design = model.matrix(as.formula(formula), data = libs)
 
 rownames(design) = libs$library
 
+
 saveRDS(object = design,
         file = design_rds)
 #+end_src
@@ -2106,8 +2107,8 @@ rule norm_txi_edger:
         {output.glm} \
         {output.cpm} \
         > {log} 2>&1
-        """
 #+end_src
+
 
 #+begin_src R :tangle ./scripts/norm_txi_edger.R
 #!/usr/bin/env Rscript
@@ -2531,20 +2532,7 @@ rna_script_dir = config['rna_repo'] + "/scripts"
 RNA_LIBS = ["lib001", "lib002", "lib003", "lib004"]
 #+end_src
 **** All rule
-#+begin_src snakemake
-rule all:
-    input:
-        analysis + "/{experiment}_txi.rdata",
-rule dumbtest:
-    output: "/tmp/test2.tsv",
-    params:
-        script = rna_script_dir + "/dumbtest.R"
-    shell:
-        """
-        Rscript {params.script} \
-        {output}
-        """
-#+end_src
+
 - [[file:./scripts/dumbtest.R][Rscript]]
   #+begin_src R :tangle ./scripts/dumbtest.R
 #!/usr/bin/env Rscript
@@ -2623,13 +2611,6 @@ BULK_RNA_LIBS = list(rna_lib_dict.keys())
 #+end_src
 ***** All rule
 #+begin_src snakemake
-rule all:
-    input:
-        expand(salmon + "/{library}.quant.sf", library = BULK_RNA_LIBS),
-        expand(analysis + "/{experiment}_txi.rdata", experiment = "all"),
-        results + "/figures/all_pca.pdf",
-        analysis + "/all_eda.rdata",
-#+end_src
 ***** Symlink inputs                                               :smk_rule:
 - Snakemake
   #+begin_src snakemake
@@ -2638,6 +2619,14 @@ rule symlink_salmon:
     input: lambda wildcards: rna_lib_dict[wildcards.library],
     log: logdir + "/{library}_symlink_salmon.log",
     output: salmon + "/{library}.quant.sf",
+=======
+        salmon = lambda wildcards: expand(f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
+                                          library = rna_map[wildcards.experiment]['libs'],
+                                          build = rna_map[wildcards.experiment]['build']),
+        gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
+    log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
+    output: f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
+>>>>>>> c610b953b2ad7f0b3b2765aee43e60ee432e8027
     params:
         script = rna_scriptdir + "/symlink_salmon.sh"
     shell:
@@ -2705,6 +2694,41 @@ rule all:
 #+begin_src snakemake
 rule symlink_rnaseq_de_inputs:
     input:
+        design = f"{rna_dir}/models/{{experiment}}_edger/design.rds",
+        txi = f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
+    log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
+    output:
+        dge = f"{rna_dir}/models/{{experiment}}_edger/dge.rds",
+        glm = f"{rna_dir}/models/{{experiment}}_edger/fit.rds",
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
+    params: script = f"{rna_script_dir}/norm_txi_edger.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input.design} \
+        {input.txi} \
+        {output.dge} \
+        {output.glm} \
+        {output.cpm} \
+        > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src R :tangle ./scripts/norm_txi_edger.R
+#!/usr/bin/env Rscript
+
+#######################
+###   Human Edger   ###
+#######################
+
+# Command line arguements
+args = commandArgs(trailingOnly = TRUE)
+design_rds = args[1]
+txi_rds = args[2]
+dge_rds = args[3]
+glm_rds = args[4]
+logcpm_tsv = args[5]
+>>>>>>> c610b953b2ad7f0b3b2765aee43e60ee432e8027
 
 #+end_src
 ***** Include statements
@@ -2791,6 +2815,7 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
                        nPermSimple = 10000)
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
 
+<<<<<<< HEAD
 ms_tft = msigdbr("mouse", category = "C2", subcategory = "CP:KEGG")
 fgsea_lists = split(as.character(ms_tft$ensembl_gene),ms_tft$gs_name)
 gsea = fgseaMultilevel(pathways = fgsea_lists,
@@ -2798,6 +2823,29 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
                        scoreType = "pos",
                        nPermSimple = 10000)
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
+=======
+#+begin_src snakemake
+rule make_cpm_pca:
+    input:
+        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
+        libraries_full = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
+    output:
+        f"{rna_dir}/models/{{experiment}}_edger/pca.png",
+        f"{rna_dir}/models/{{experiment}}_edger/pca.svg",
+    params:
+        formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
+        script = f"{rna_script_dir}/make_cpm_pca.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input.cpm} \
+        "{params.formula}" \
+        {input.libraries_full} \
+        {output} > {log} 2>&1
+        """
+#+end_src
+
 
 ms_hal = msigdbr(species = "mouse", category = "H")
 
