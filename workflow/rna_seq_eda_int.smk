@@ -1,9 +1,13 @@
+# Preamble
+
 #print("Integration testing snakefile for bulk RNA-seq\n")
 
 # Import common packages
 import pandas as pd
 import re
 import numpy as np
+
+# Variable naming
 
 datadir = config["datadir"]
 inputs=datadir + "/inputs"
@@ -17,6 +21,8 @@ logdir = config["datadir"] + "/logs"
 rna_repo = config["rna_repo"]
 rna_scriptdir = rna_repo + "/scripts"
 library_tsv=inputs + "/libraries.tsv"
+
+# Functions, miscellaneous
 
 rna_libraries = pd.read_table(inputs + "/libraries.tsv")
 rna_libraries["path"]= inputs + "/" + rna_libraries["basename"]
@@ -35,12 +41,17 @@ rna_lib_dict = dict(zip(rna_library_indict, rna_file_indict))
 
 BULK_RNA_LIBS = list(rna_lib_dict.keys())
 
+# All rule
+
 rule all:
     input:
         expand(salmon + "/{library}.quant.sf", library = BULK_RNA_LIBS),
         expand(analysis + "/{experiment}_txi.rdata", experiment = "all"),
         results + "/figures/all_pca.pdf",
         analysis + "/all_eda.rdata",
+
+# Symlink inputs                                               :smk_rule:
+# - Snakemake
 
 rule symlink_salmon:
     container: rna_container,
@@ -53,5 +64,7 @@ rule symlink_salmon:
         """
         {params.script} {input} {output} &> {log}
         """
+
+# Include statements
 
 include: rna_repo + "/workflow/rna_seq_eda.smk"

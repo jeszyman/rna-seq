@@ -14,14 +14,17 @@ out_pdf = args[3]
 #dge_tsv = "~/cards/analysis/rna/contrasts/sod2_v_fvb_at_sham/sod2_v_fvb_at_sham.tsv"
 #logcpm_tsv = "~/cards/analysis/rna/models/sod_kept/sod_kept_cpm.tsv"
 
+dge_tsv = "~/cards/analysis/rna/models/sod_kept/edger_dge.rds"
+formula_str = "~0 + cohort + sex"
+
 library(ComplexHeatmap)
 library(tidyverse)
 library(ggsci)
 
 dge = read_tsv(dge_tsv)
 
-formula="~0 + cohort + sex"
-factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula)
+
+factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula_str)
 factor_str = trimws(factor_str)
 factor_vec = strsplit(factor_str, " ")[[1]]
 

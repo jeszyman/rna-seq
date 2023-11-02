@@ -1,3 +1,12 @@
+######################################
+###   RNA-seq Initial Processing   ###
+######################################
+
+
+
+# Makes a GTF with only protien_coding and lincRNA biotypes from an Ensembl GTF
+
+
 rule make_wtrans_filtered_gtf:
     input: f"{ref_dir}/{{build}}.gtf.gz",
     log: f"{log_dir}/{{build}}_make_wtrans_filtered_gtf.log",
@@ -19,7 +28,7 @@ rule make_annotation_from_gtf:
         """
         Rscript {params.script} \
         {input} \
-        "{params.bmart_data}" \
+        {params.bmart_data} \
         {output} \
         > {log} 2>&1
         """
@@ -54,23 +63,7 @@ rule pe_rna_seq_fastp:
         {output.failed} \
         {output.unpaired1} \
         {output.unpaired2} \
-        {params.threads} &> {output.cmd} && \
-        [[ -s {output.read1} ]] && [[ -s {output.read2} ]]
-        """
-
-rule pe_rna_seq_fastqc:
-    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
-    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
-    params:
-        out_dir = qc_dir,
-        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
-        threads = threads,
-    shell:
-        """
-        {params.script} \
-        {input} \
-        {params.out_dir} {params.threads} &> {log}
+        {params.threads} &> {output.cmd}
         """
 
 rule pe_quant_with_salmon:
@@ -95,68 +88,31 @@ rule pe_quant_with_salmon:
         [[ -s {output[0]} ]] || (echo "Output file is empty: {output[0]}" && exit 1)
         """
 
-rule make_edger_lrt:
-    input:
-        design = lambda wildcards: lrt_map[wildcards.contrast]['design'],
-        fit = lambda wildcards: lrt_map[wildcards.contrast]['fit'],
-    log: f"{log_dir}/{{contrast}}_make_edger_lrt.log",
-    output: f"{rna_dir}/contrasts/lrt_{{contrast}}/lrt_{{contrast}}.tsv",
-    params: script = f"{rna_script_dir}/make_edger_lrt.R",
-    shell:
-        """
-        Rscript {params.script} {input} {output} > {log} 2>&1
-        """
-
-rule make_edger_contrast_de:
-    input:
-        design = lambda wildcards: dge_map[wildcards.contrast]['design'],
-        fit = lambda wildcards: dge_map[wildcards.contrast]['fit'],
-    log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
-    output: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
     params:
-        annotation_tsv = lambda wildcards: dge_map[wildcards.contrast]['annotation_tsv'],
-        cohorts_str = lambda wildcards: dge_map[wildcards.contrast]['cohorts_str'],
-        script = f"{rna_script_dir}/make_edger_contrast_de.R",
+        out_dir = qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
     shell:
         """
-        Rscript {params.script} \
-        {input.design} \
-        {input.fit} \
-        {params.annotation_tsv} \
-        "{params.cohorts_str}" \
-        {output} > {log} 2>&1
-        """
-
-rule rna_volcano:
-    input: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
-    log: f"{log_dir}/{{contrast}}_rna_volcano.log",
-    output: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_volcano.pdf",
-    params: script = f"{rna_script_dir}/rna_volcano.R",
-    shell:
-        """
-        Rscript {params.script} \
+        {params.script} \
         {input} \
-        {output} \
-        > {log} 2>&1
+        {params.out_dir} {params.threads} &> {log}
         """
 
-rule gsea_from_edger:
-    input: f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}.tsv",
-    log: f"{log_dir}/{{contrast}}_{{pathset}}_gsea_from_edger.log",
-    output:
-       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.tsv",
-       f"{rna_dir}/contrasts/{{contrast}}/{{contrast}}_gsea_{{pathset}}.xlsx",
-    params: script = f"{rna_script_dir}/gsea_from_edger.R",
-    shell:
-        """
-        Rscript {params.script} {input} {wildcards.pathset} {output} > {log} 2>&1
-        """
+
+
+# Make an experimental design for the list of libraries
+
 
 rule make_dge_design:
     input:
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_dge_design.log",
-    output: f"{rna_dir}/models/{{experiment}}_edger/design.rds",
+    output: f"{rna_dir}/models/{{experiment}}/design.rds",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         libs = lambda wildcards: rna_map[wildcards.experiment]['libs'],
@@ -171,6 +127,11 @@ rule make_dge_design:
         > {log} 2>&1
         """
 
+
+
+# Annotate and summarize counts for salmon files
+
+
 rule make_salmon_txi:
     input:
         salmon = lambda wildcards: expand(f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
@@ -178,7 +139,7 @@ rule make_salmon_txi:
                                           build = rna_map[wildcards.experiment]['build']),
         gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
     log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
-    output: f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
+    output: f"{rna_dir}/models/{{experiment}}/txi.rds",
     params:
         script = rna_script_dir + "/make_salmon_txi.R",
     shell:
@@ -191,13 +152,13 @@ rule make_salmon_txi:
 
 rule norm_txi_edger:
     input:
-        design = f"{rna_dir}/models/{{experiment}}_edger/design.rds",
-        txi = f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
+        design = f"{rna_dir}/models/{{experiment}}/design.rds",
+        txi = f"{rna_dir}/models/{{experiment}}/txi.rds",
     log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}_edger/dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}_edger/fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
+        dge = f"{rna_dir}/models/{{experiment}}/edger_dge.rds",
+        glm = f"{rna_dir}/models/{{experiment}}/edger_fit.rds",
+        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
     params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
@@ -208,16 +169,20 @@ rule norm_txi_edger:
         {output.glm} \
         {output.cpm} \
         > {log} 2>&1
-        """
+
+
+
+# Makes a logCPM-based PCA plot.
+
 
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}_edger/cpm.tsv",
+        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
-        f"{rna_dir}/models/{{experiment}}_edger/pca.png",
-        f"{rna_dir}/models/{{experiment}}_edger/pca.svg",
+        f"{rna_dir}/models/{{experiment}}/pca.png",
+        f"{rna_dir}/models/{{experiment}}/pca.svg",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
@@ -228,4 +193,49 @@ rule make_cpm_pca:
         "{params.formula}" \
         {input.libraries_full} \
         {output} > {log} 2>&1
+        """
+
+rule make_edger_contrast_de:
+    input:
+        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/design.rds",
+        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
+        annotation_tsv = lambda wildcards: f"{ref_dir}/{dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
+    log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
+    output: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
+    params:
+        cohorts_str = lambda wildcards: dge_map[wildcards.contrast]['cohorts_str'],
+        script = f"{rna_script_dir}/make_edger_contrast_de.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input.design} \
+        {input.fit} \
+        {input.annotation_tsv} \
+        "{params.cohorts_str}" \
+        {output} > {log} 2>&1
+        """
+
+rule rna_volcano:
+    input: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
+    log: f"{log_dir}/{{contrast}}_rna_volcano.log",
+    output: f"{rna_dir}/contrasts/{{contrast}}/volcano.pdf",
+    params: script = f"{rna_script_dir}/rna_volcano.R",
+    shell:
+        """
+        Rscript {params.script} \
+        {input} \
+        {output} \
+        > {log} 2>&1
+        """
+
+rule gsea_from_edger:
+    input: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
+    log: f"{log_dir}/{{contrast}}_{{pathset}}_gsea_from_edger.log",
+    output:
+       f"{rna_dir}/contrasts/{{contrast}}/gsea_{{pathset}}.tsv",
+       f"{rna_dir}/contrasts/{{contrast}}/gsea_{{pathset}}.xlsx",
+    params: script = f"{rna_script_dir}/gsea_from_edger.R",
+    shell:
+        """
+        Rscript {params.script} {input} {wildcards.pathset} {output} > {log} 2>&1
         """

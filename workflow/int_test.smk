@@ -1,3 +1,5 @@
+# Preamble
+
 #########1#########2#########3#########4#########5#########6#########7#########8
 ###                                                                          ###
 ###               Integration Testing Snakefile for RNA-seq                  ###
@@ -13,6 +15,8 @@ import os
 import pandas as pd
 import re
 
+# Variable naming
+
 ###########################
 ###   Variable Naming   ###
 ###########################
@@ -23,7 +27,11 @@ threads = config['threads']
 # Names build from configuration parameter base
 rna_script_dir = config['rna_repo'] + "/scripts"
 
+# Functions
+
 RNA_LIBS = ["lib001", "lib002", "lib003", "lib004"]
+
+# All rule
 
 rule all:
     input:
