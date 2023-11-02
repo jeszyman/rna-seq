@@ -106,14 +106,14 @@ cp ~/card/inputs/Rentschler_s4630_MGI0042/9-ct.TCCAGAATGT-TGGTCCAATT/9-ct.TCCAGA
 cp ~/card/inputs/Rentschler_s4630_MGI0042/8-ct.CCGAACATGT-ACCTCATTGA/8-ct.CCGAACATGT-ACCTCATTGA.quant.sf ${repo}/test/inputs/normal.quant.sf
 #+end_src
 - file:test/inputs/libraries.tsv
-  | library | basename            | participant | run  | group |
-  |---------+---------------------+-------------+------+-------|
-  | lib001  | ctrl.quant.sf       | subj001     | seq1 | ctrl  |
-  | lib002  | ctrl2.quant.sf      | subj002     | seq2 | ctrl  |
-  | lib003  | normal.quant.sf     | subj003     | seq1 | ctrl  |
-  | lib004  | exp1.quant.sf       | subj004     | seq2 | exp   |
-  | lib005  | exp2.quant.sf       | subj005     | seq1 | exp   |
-  | lib006  | expsample3.quant.sf | subj006     | seq2 | exp   |
+  | library  | basename  | participant  | run  | group  |
+  |---+---+---+---+---|
+  | lib001  | ctrl.quant.sf  | subj001  | seq1  | ctrl  |
+  | lib002  | ctrl2.quant.sf  | subj002  | seq2  | ctrl  |
+  | lib003  | normal.quant.sf  | subj003  | seq1  | ctrl  |
+  | lib004  | exp1.quant.sf  | subj004  | seq2  | exp  |
+  | lib005  | exp2.quant.sf  | subj005  | seq1  | exp  |
+  | lib006  | expsample3.quant.sf  | subj006  | seq2  | exp  |
 *** Snakemake configuration YAML
 #+begin_src bash :tangle ./config/int_test.yaml
 experiment_id: inttest_human
