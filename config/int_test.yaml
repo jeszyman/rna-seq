@@ -1,3 +1,5 @@
+# Snakemake configuration YAML
+
 experiment_id: inttest_human
 txdb: "TxDb.Mmusculus.UCSC.mm10.ensGene",
 threads: 4

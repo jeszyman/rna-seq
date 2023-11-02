@@ -40,6 +40,7 @@ names = getBM(
   mart = mart,
   uniqueRows = T)
 
-names <- names %>% distinct(ensembl_gene_id, .keep_all = TRUE) %>% as_tibble(names)
+names =
+  names %>% group_by(ensembl_gene_id) %>% slice_head(n = 1)
 
 write_tsv(names, file = tsv)

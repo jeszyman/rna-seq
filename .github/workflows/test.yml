@@ -1,3 +1,5 @@
+# Github continuous integration
+
 name: Snakemake CI
 
 on: [push, pull_request]

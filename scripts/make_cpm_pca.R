@@ -10,7 +10,7 @@ factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula)
 factor_str = trimws(factor_str)
 
 factor_vec = strsplit(factor_str, " ")[[1]]
-factor_vec = factor_vec[!factor_vec == "+"]
+factor_vec <- factor_vec[!grepl("~|:|\\+", factor_vec)]
 
 library(cowplot)
 library(ggrepel)
