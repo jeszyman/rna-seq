@@ -1818,7 +1818,6 @@ Makes a GTF with only protien_coding and lincRNA biotypes from an Ensembl GTF
 
 ***** Make filtered GTF for whole transcriptome gene expression
 - https://www.biostars.org/p/106590/
->>>>>>> f1b55e3... .
 #+begin_src snakemake
 rule make_wtrans_filtered_gtf:
     input: f"{ref_dir}/{{build}}.gtf.gz",
@@ -2730,14 +2729,12 @@ rule symlink_salmon:
     input: lambda wildcards: rna_lib_dict[wildcards.library],
     log: logdir + "/{library}_symlink_salmon.log",
     output: salmon + "/{library}.quant.sf",
-=======
         salmon = lambda wildcards: expand(f"{rna_dir}/salmon/{{library}}_{{build}}/quant.sf",
                                           library = rna_map[wildcards.experiment]['libs'],
                                           build = rna_map[wildcards.experiment]['build']),
         gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
     log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
     output: f"{rna_dir}/models/{{experiment}}_edger/txi.rds",
->>>>>>> c610b953b2ad7f0b3b2765aee43e60ee432e8027
     params:
         script = rna_scriptdir + "/symlink_salmon.sh"
     shell:
