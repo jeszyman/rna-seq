@@ -178,9 +178,31 @@ jobs:
       run: |
         conda install -c conda-forge mamba
 
+
     - name: Create Conda Environment
       run: |
         mamba env update -f ./config/rna_env.yaml
+
+#+end_src
+- file:test/inputs/libraries.tsv
+  | library | basename            | participant | run  | group |
+  |---------+---------------------+-------------+------+-------|
+  | lib001  | ctrl.quant.sf       | subj001     | seq1 | ctrl  |
+  | lib002  | ctrl2.quant.sf      | subj002     | seq2 | ctrl  |
+  | lib003  | normal.quant.sf     | subj003     | seq1 | ctrl  |
+  | lib004  | exp1.quant.sf       | subj004     | seq2 | exp   |
+  | lib005  | exp2.quant.sf       | subj005     | seq1 | exp   |
+  | lib006  | expsample3.quant.sf | subj006     | seq2 | exp   |
+*** Snakemake configuration YAML
+#+begin_src bash :tangle ./config/int_test.yaml
+experiment_id: inttest_human
+txdb: "TxDb.Mmusculus.UCSC.mm10.ensGene",
+threads: 4
+rna_container: "/home/jeszyman/sing_containers/rna.1.2.0.sif"
+datadir: "test"
+rna_repo: "/home/jeszyman/repos/rna-seq"
+factor_str: "run group"
+
 #+end_src
 
 *** DONE [[id:1a8d792b-9621-42a8-80c9-399b6065630a][Bioinformatics pipeline initial build]]
@@ -2924,6 +2946,7 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
 
 
+
 ms_tft = msigdbr("mouse", category = "C2", subcategory = "CP:KEGG")
 fgsea_lists = split(as.character(ms_tft$ensembl_gene),ms_tft$gs_name)
 gsea = fgseaMultilevel(pathways = fgsea_lists,
@@ -2931,6 +2954,7 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
                        scoreType = "pos",
                        nPermSimple = 10000)
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
+
 #+end_src
 #+begin_src snakemake
 rule make_cpm_pca:
