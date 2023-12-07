@@ -4,6 +4,112 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes :noweb yes :comments org
 :END:
 ** Repository administration
+*** Initialize a local test environment
+#+begin_src bash
+#!/usr/bin/env bash
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "You must source this script"
+  exit 1
+fi
+
+# Unique identifier - typically the remote URL of your repo
+UNIQUE_IDENTIFIER="git@github.com:jeszyman/rna-seq.git"
+
+# Check if .git directory exists
+if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
+    # Check if the remote URL matches
+    CURRENT_REPO_URL=$(git config --get remote.origin.url)
+    if [ "$CURRENT_REPO_URL" = "$UNIQUE_IDENTIFIER" ]; then
+        echo "In the correct rna-seq repository."
+        # Run your commands here
+    else
+        echo "Not the correct repository."
+        exit 1
+    fi
+else
+    echo "Not a Git repository."
+    exit 1
+fi
+
+source /opt/miniconda3/bin/activate base
+
+#!/bin/bash
+conda env list | grep -q 'rna'
+# Check if the 'rna' environment exists
+if conda env list | grep -q 'rna'; then
+    # Environment exists, run mamba update
+    mamba env update --name rna --file ./basecamp/resources/conda/basecamp_env.yaml
+else
+    echo "Environment 'rna' does not exist."
+fi
+
+mamba env update --name rna --file ./basecamp/resources/conda/basecamp_env.yaml
+mamba env update --name rna --file ./biotools/resources/conda/biotools_env.yaml
+mamba env update --name rna --file ./config/rna_env.yaml
+
+conda list --name rna > ./resources/rna_full_conda_env.txt
+
+source ./biotools/lib/bioinformatics_function.sh
+source ./basecamp/lib/conda_functions.sh
+
+code.header
+
+block.comment
+
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+set -o pipefail  # don't hide errors within pipes
+
+variables(){
+    ="${1}"
+}
+
+main(){
+    variables
+}
+
+
+bash.usage
+usage(){}
+
+[ "/" = -h ] && print_usage && exit 1
+
+main "$@"
+
+#+end_src
+
+*** Emacs
+#+TODO: TODO TEST(t) INPROCESS(p) DEBUG(d) REFACTOR(r) DOCUMENT(d) BLOCKED(b&) WAITING(w&) | DONE DELEGATED
+*** Github continuous integration
+#+begin_src bash :tangle ./.github/workflows/test.yml
+name: Snakemake CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        auto-activate-base: true
+
+    - name: Install Mamba
+      run: |
+        conda install -c conda-forge mamba
+
+    - name: Create Conda Environment
+      run: |
+        mamba env update -f ./config/rna_env.yaml
+#+end_src
+
+>>>>>>> f1b55e3... .
 *** Conda environmental YAMLs
 **** RNA
 #+begin_src bash :tangle ./config/rna_env.yaml
@@ -1704,10 +1810,15 @@ testscale = gsva(mouse_scale, msigdbr_list, kcdf="Poisson")
 #+end_src
 
 **** Reference processing
+
 ***** Make filtered Ensembl GTF for whole transcriptome gene expression
 
 Makes a GTF with only protien_coding and lincRNA biotypes from an Ensembl GTF
 
+
+***** Make filtered GTF for whole transcriptome gene expression
+- https://www.biostars.org/p/106590/
+>>>>>>> f1b55e3... .
 #+begin_src snakemake
 rule make_wtrans_filtered_gtf:
     input: f"{ref_dir}/{{build}}.gtf.gz",
@@ -1814,8 +1925,8 @@ rule pe_rna_seq_fastp:
         failed = f"{rna_dir}/fastqs/pe/{{library}}_failed_fastp.fastq.gz",
         unpaired1 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R1.fastq.gz",
         unpaired2 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R2.fastq.gz",
-        json = f"{qc_dir}/{{library}}_fastp.json",
-        cmd = f"{qc_dir}/{{library}}_fastp.log",
+        json = f"{rna_qc_dir}/{{library}}_fastp.json",
+        cmd = f"{rna_qc_dir}/{{library}}_fastp.log",
     params:
         script = f"{rna_script_dir}/pe_rna_seq_fastp.sh",
         threads = 4
@@ -1940,9 +2051,9 @@ salmon quant \
 rule pe_rna_seq_fastqc:
     input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
     params:
-        out_dir = qc_dir,
+        out_dir = rna_qc_dir,
         script = f"{rna_script_dir}/rna_seq_fastqc.sh",
         threads = threads,
     shell:
@@ -2815,7 +2926,7 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
                        nPermSimple = 10000)
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
 
-<<<<<<< HEAD
+
 ms_tft = msigdbr("mouse", category = "C2", subcategory = "CP:KEGG")
 fgsea_lists = split(as.character(ms_tft$ensembl_gene),ms_tft$gs_name)
 gsea = fgseaMultilevel(pathways = fgsea_lists,
@@ -2823,7 +2934,7 @@ gsea = fgseaMultilevel(pathways = fgsea_lists,
                        scoreType = "pos",
                        nPermSimple = 10000)
 gsea %>% as_tibble() %>% arrange(padj) %>% filter(padj < 0.1)
-=======
+#+end_src
 #+begin_src snakemake
 rule make_cpm_pca:
     input:
@@ -3091,8 +3202,27 @@ results = test %>% rownames_to_column(var = "ensembl_gene_id") %>% left_join(ann
 
 results %>% arrange(padj) %>% filter(padj < 0.05) %>% dplyr::select(external_gene_name, description, log2FoldChange, padj) %>% write_tsv("/tmp/test.tsv")
 
+
 names(res)
 #+end_src
+
+*** Ideas
+:PROPERTIES:
+:header-args:snakemake: :tangle no
+:END:
+** README
+:PROPERTIES:
+:export_file_name: ./readme.md
+:export_file_options: toc:nil
+:END:
+Software is managed with conda. A full list of software versions is at [[file:resources/]]
+*** Pipeline Directed Acyclic Graphs
+*** Prerequisites for local integration testing
+- See configuation file (./config/int_test.yaml) for required parameters and versioned singularity container
+*** Changelog
+- [2022-10-28 Fri] Stable 1.0.1 libraries_tsv naming abstracted
+- [2022-10-28 Fri] Stable 1.0.0 Basic edgeR run
+>>>>>>> f1b55e3... .
 
 *** Ideas                                                             :ideas:
 - cibersort

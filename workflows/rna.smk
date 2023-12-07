@@ -44,8 +44,8 @@ rule pe_rna_seq_fastp:
         failed = f"{rna_dir}/fastqs/pe/{{library}}_failed_fastp.fastq.gz",
         unpaired1 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R1.fastq.gz",
         unpaired2 = f"{rna_dir}/fastqs/pe/{{library}}_unpaired_R2.fastq.gz",
-        json = f"{qc_dir}/{{library}}_fastp.json",
-        cmd = f"{qc_dir}/{{library}}_fastp.log",
+        json = f"{rna_qc_dir}/{{library}}_fastp.json",
+        cmd = f"{rna_qc_dir}/{{library}}_fastp.log",
     params:
         script = f"{rna_script_dir}/pe_rna_seq_fastp.sh",
         threads = 4
@@ -66,6 +66,24 @@ rule pe_rna_seq_fastp:
         {params.threads} &> {output.cmd}
         """
 
+<<<<<<< HEAD
+=======
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    params:
+        out_dir = rna_qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+
+>>>>>>> f1b55e3... .
 rule pe_quant_with_salmon:
     input:
         index = f"{ref_dir}/{{build}}_salmon",
