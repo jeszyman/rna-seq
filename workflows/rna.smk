@@ -3,9 +3,7 @@
 ######################################
 
 
-
-# Makes a GTF with only protien_coding and lincRNA biotypes from an Ensembl GTF
-
+# - https://www.biostars.org/p/106590/
 
 rule make_wtrans_filtered_gtf:
     input: f"{ref_dir}/{{build}}.gtf.gz",
@@ -66,24 +64,6 @@ rule pe_rna_seq_fastp:
         {params.threads} &> {output.cmd}
         """
 
-<<<<<<< HEAD
-=======
-rule pe_rna_seq_fastqc:
-    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
-    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
-    params:
-        out_dir = rna_qc_dir,
-        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
-        threads = threads,
-    shell:
-        """
-        {params.script} \
-        {input} \
-        {params.out_dir} {params.threads} &> {log}
-        """
-
->>>>>>> f1b55e3... .
 rule pe_quant_with_salmon:
     input:
         index = f"{ref_dir}/{{build}}_salmon",
@@ -109,9 +89,9 @@ rule pe_quant_with_salmon:
 rule pe_rna_seq_fastqc:
     input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
     log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
     params:
-        out_dir = qc_dir,
+        out_dir = rna_qc_dir,
         script = f"{rna_script_dir}/rna_seq_fastqc.sh",
         threads = threads,
     shell:
@@ -187,6 +167,7 @@ rule norm_txi_edger:
         {output.glm} \
         {output.cpm} \
         > {log} 2>&1
+        """
 
 
 

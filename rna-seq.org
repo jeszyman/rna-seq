@@ -2239,6 +2239,7 @@ rule norm_txi_edger:
         {output.glm} \
         {output.cpm} \
         > {log} 2>&1
+        """
 #+end_src
 
 
