@@ -129,6 +129,7 @@ dependencies:
   - bioconductor-complexheatmap
   - bioconductor-deseq2
   - bioconductor-edger
+  - bioconductor-sva
   - bioconductor-fgsea
   - bioconductor-ruvseq
   - bioconductor-rsamtools
@@ -2022,6 +2023,36 @@ main "$@"
 
 #+end_src
 
+***** Read-level Quality control with FastQC
+
+#+begin_src snakemake
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    params:
+        out_dir = rna_qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+#+end_src
+
+#+begin_src bash :tangle ./scripts/rna_seq_fastqc.sh
+input="${1}"
+outdir="${2}"
+threads="${3}"
+
+fastqc  --outdir $outdir \
+        --quiet \
+        --threads $threads $input
+
+#+end_src
+
 ***** Quantify transcripts with salmon
 #+begin_src snakemake
 rule pe_quant_with_salmon:
@@ -2066,36 +2097,6 @@ salmon quant \
        --validateMappings
 
 #+end_src
-***** Read-level Quality control with FastQC
-
-#+begin_src snakemake
-rule pe_rna_seq_fastqc:
-    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
-    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
-    params:
-        out_dir = rna_qc_dir,
-        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
-        threads = threads,
-    shell:
-        """
-        {params.script} \
-        {input} \
-        {params.out_dir} {params.threads} &> {log}
-        """
-#+end_src
-
-#+begin_src bash :tangle ./scripts/rna_seq_fastqc.sh
-input="${1}"
-outdir="${2}"
-threads="${3}"
-
-fastqc  --outdir $outdir \
-        --quiet \
-        --threads $threads $input
-
-#+end_src
-
 *** Workflow 2: Per-experiment
 **** Create design
 
