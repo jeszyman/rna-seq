@@ -1822,6 +1822,14 @@ testscale = gsva(mouse_scale, msigdbr_list, kcdf="Poisson")
 :PROPERTIES:
 :header-args:snakemake: :tangle ./workflows/rna.smk
 :END:
+*** Writeup
+:PROPERTIES:
+:ID:       5626df9f-63f0-4ea3-8736-80bda68ece56
+:CUSTOM_ID:      5626df9f-63f0-4ea3-8736-80bda68ece56
+:END:
+
+Bulk RNA-seq reads were adapter-trimmed using fastp [[cite:&chen2018b]] and read quality was assessed using FastQC [[cite:&andrews2010]]. Transcript abundance was quantified using salmon [[cite:&patro2017]] and transcript abundance was aggregated to gene-level counts using tximport [[cite:&soneson2016tximport]]. Counts for all protein coding and long non-coding RNA genes were aggregated. Gene abundance counts normalized in EdgeR [[cite:&chen2008]]. Count-level quality control included principal component analysis. Batch correction was performed in ComBat-seq [[cite:&zhang2020combat]]. Differential expression was also determined in EdgeR using glmQLFTest for individual cohort contrasts. Gene set enrichment analysis was performed in the fgsea R package [[cite:&korotkevich2016fgsea]] with pathway sets from the msigdbr package [[cite:&dolgalev2022msigdbr]].
+
 *** Workflow 1: Initial processing
 **** Preamble
 #+begin_src snakemake
@@ -1833,11 +1841,9 @@ testscale = gsva(mouse_scale, msigdbr_list, kcdf="Poisson")
 #+end_src
 
 **** Reference processing
-
 ***** Make filtered Ensembl GTF for whole transcriptome gene expression
 
 Makes a GTF with only protien_coding and lincRNA biotypes from an Ensembl GTF
-
 
 ***** Make filtered GTF for whole transcriptome gene expression
 - https://www.biostars.org/p/106590/
@@ -1861,8 +1867,6 @@ out_gtf="${2}"
 zcat $in_gtf | awk '$0 ~ /gene_biotype "protein_coding"|gene_biotype "lncRNA"/' | gzip > $out_gtf
 
 #+end_src
-
-See https://www.biostars.org/p/106590/
 
 ***** Make per-gtf annotation table
 #+begin_src snakemake
@@ -2098,16 +2102,17 @@ salmon quant \
 
 #+end_src
 *** Workflow 2: Per-experiment
-**** Create design
+**** Unadjusted
+***** Create design
 
-Make an experimental design for the list of libraries
+Make an experimental design for the list of libraries.
 
 #+begin_src snakemake
 rule make_dge_design:
     input:
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_dge_design.log",
-    output: f"{rna_dir}/models/{{experiment}}/design.rds",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         libs = lambda wildcards: rna_map[wildcards.experiment]['libs'],
@@ -2162,8 +2167,7 @@ rownames(design) = libs$library
 saveRDS(object = design,
         file = design_rds)
 #+end_src
-
-**** Summarize gene-level abundance with txi counts from salmon files :smk_rule:
+***** Summarize gene-level abundance with txi counts from salmon files :smk_rule:
 
 Annotate and summarize counts for salmon files
 
@@ -2176,7 +2180,7 @@ rule make_salmon_txi:
                                           build = rna_map[wildcards.experiment]['build']),
         gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
     log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
-    output: f"{rna_dir}/models/{{experiment}}/txi.rds",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
     params:
         script = rna_script_dir + "/make_salmon_txi.R",
     shell:
@@ -2219,7 +2223,7 @@ txi = tximport(salmon_vect, type = "salmon", tx2gene = tx2gene, ignoreTxVersion 
 saveRDS(txi, file = out_txi)
 #+end_src
 
-**** Normalize txi counts across the experimental design for use in edgeR
+***** Normalize txi counts across the experimental design for use in edgeR
 #+begin_src snakemake
 rule norm_txi_edger:
     input:
@@ -2227,9 +2231,9 @@ rule norm_txi_edger:
         txi = f"{rna_dir}/models/{{experiment}}/txi.rds",
     log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}/edger_dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}/edger_fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
+        dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
+        glm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_fit.rds",
+        cpm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_cpm.tsv",
     params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
@@ -2242,8 +2246,6 @@ rule norm_txi_edger:
         > {log} 2>&1
         """
 #+end_src
-
-
 #+begin_src R :tangle ./scripts/norm_txi_edger.R
 #!/usr/bin/env Rscript
 
@@ -2301,19 +2303,19 @@ saveRDS(fit, glm_rds)
 
 logcpm %>% as.data.frame(.) %>% rownames_to_column(var = "ensembl") %>% as_tibble() %>% write_tsv(., file = logcpm_tsv)
 #+end_src
-**** PCA
+***** PCA
 
 Makes a logCPM-based PCA plot.
 
 #+begin_src snakemake
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
+        cpm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
-        f"{rna_dir}/models/{{experiment}}/pca.png",
-        f"{rna_dir}/models/{{experiment}}/pca.svg",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.png",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.svg",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
@@ -2376,6 +2378,202 @@ ggsave(filename = out_png, plot = plot, device = "png", width = 8, height = 6)
 ggsave(filename = out_svg, plot = plot, device = "svg", width = 8, height = 6)
 
 #+end_src
+**** Batch correction with ComBat-seq
+#+begin_src snakemake
+rule make_rna_batch_corrections:
+    input:
+        design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
+        libs = libraries_full_rds,
+        txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    output:
+        design = f"{rna_dir}/models/combat/{{experiment}}/design.rds",
+        dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
+        glm = f"{rna_dir}/models/combat/{{experiment}}/edger_fit.rds",
+        pca = f"{rna_dir}/models/combat/{{experiment}}/pca.pdf",
+    params:
+        batch_var = lambda wildcards: rna_map[wildcards.experiment]['batch_var'],
+        covars = lambda wildcards: rna_map[wildcards.experiment]['covars'],
+        script = f"{rna_script_dir}/make_rna_batch_corrections.R",
+    shell:
+        """
+	cp {input.design} {output.design}
+	Rscript {params.script} \
+	--batch_var {params.batch_var} \
+	--covars {params.covars} \
+	--design_rds {output.design} \
+	--dge_rds {output.dge} \
+	--glm_rds {output.glm} \
+	--libraries_full_rds {input.libs} \
+	--pdf {output.pca} \
+	--txi_rds {input.txi}
+	"""
+#+end_src
+
+#+begin_src bash :tangle ./scripts/make_rna_batch_corrections.R
+#!/usr/bin/env Rscript
+
+# ---   Setup   --- #
+# ----------------- #
+
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
+library(optparse)
+library(cowplot)
+library(edgeR)
+library(gridExtra)
+library(ggrepel)
+library(patchwork)
+library(sva)
+library(tidyverse)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--batch_var"), type = "character", default = "run"),
+  make_option(c("--covars"), type = "character", default = "cohort"),
+  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/design.rds"),
+  make_option(c("--dge_rds"), type = "character", default = "/tmp/dge.rds"),
+  make_option(c("--glm_rds"), type = "character", default = "/tmp/glm.rds"),
+  make_option(c("--libraries_full_rds"), type = "character", default = "~/cards/data-model/lists/libraries_full.rds"),
+  make_option(c("--adjusted_rds"), type = "character", default = "/tmp/adjusted.rds"),
+  make_option(c("--pdf"), type = "character", default = "/tmp/adjusted.pdf"),
+  make_option(c("--txi_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/txi.rds")
+)
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
+
+design <- readRDS(design_rds)
+libraries_full <- readRDS(libraries_full_rds)
+txi <- readRDS(txi_rds)
+counts <- txi$counts
+
+batch <- data.frame(library = colnames(counts)) %>%
+  left_join(libraries_full, by = "library") %>%
+  pull(!!sym(batch_var)) %>%
+  as.factor() %>%
+  as.integer()
+
+covars_vect <- unlist(strsplit(covars, " "))
+
+# ---   Perform Combatseq   --- #
+# ----------------------------- #
+
+# Check if there is only one covariate
+if (length(covars_vect) == 1) {
+  covar <- data.frame(library = colnames(counts)) %>%
+    left_join(libraries_full, by = "library") %>%
+    pull(!!sym(covars_vect[1])) %>%
+    as.factor() %>%
+    as.integer()
+  adjusted <- ComBat_seq(counts,
+                         batch = batch,
+                         group = covar)
+} else { # If there are multiple covariates
+  covar_list <- list() # Initialize an empty list to store covariate vectors
+  for (covar_name in covars_vect) {
+    covar <- data.frame(library = colnames(counts)) %>%
+      left_join(libraries_full, by = "library") %>%
+      pull(!!sym(covar_name)) %>%
+      as.factor() %>%
+      as.integer()
+    covar_list[[covar_name]] <- covar
+  }
+  # Combine all covariate vectors into a matrix
+  covar_mat <- do.call(cbind, covar_list)
+  adjusted <- ComBat_seq(counts,
+                         batch = batch,
+                         group = NULL,
+                         covar_mod = covar_mat)
+}
+
+# ---   Normalize Adjusted Counts Across Exp Design   --- #
+# ------------------------------------------------------- #
+
+make_dge_list <- function( eff_gene_len, counts_mat, design ) {
+  normMat <- eff_gene_len
+  # Obtaining per-observation scaling factors for length, adjusted to avoid
+  # changing the magnitude of the counts.
+  normMat <- normMat/exp(rowMeans(log(normMat)))
+  normCts <- counts_mat/normMat
+  # Computing effective library sizes from scaled counts, to account for
+  # composition biases between samples.
+  eff.lib <- calcNormFactors(normCts) * colSums(normCts)
+  # Combining effective library sizes with the length factors, and calculating
+  # offsets for a log-link GLM.
+  normMat <- sweep(normMat, 2, eff.lib, "*")
+  normMat <- log(normMat)
+  # Creating a DGEList object for use in edgeR.
+  y <- DGEList(counts_mat)
+  y <- scaleOffset(y, normMat)
+  keep <- filterByExpr(y, design)
+  y <- y[keep, ]
+  return(y)
+}
+
+y <- make_dge_list(txi$length, adjusted, design)
+y <- estimateDisp(y,design)
+fit <- glmQLFit(y,design)
+
+logcpm_adjusted <- edgeR::cpm(y, normalized.lib.sizes = TRUE, log = TRUE, prior.count = 2)
+
+logcpm <- edgeR::cpm(make_dge_list(txi$length, txi$counts, design), normalized.lib.sizes = TRUE, log = TRUE, prior.count = 2)
+
+saveRDS(y, dge_rds)
+saveRDS(fit, file = glm_rds)
+
+# ---   Make PCAs   --- #
+# --------------------- #
+
+find_pca_extents <- function(logcpm1, logcpm2) {
+  pca1 <- prcomp(t(as.matrix(logcpm1[,-1])))
+  pca2 <- prcomp(t(as.matrix(logcpm2[,-1])))
+
+  combined <- rbind(as.data.frame(pca1$x), as.data.frame(pca2$x))
+  xlims <- range(combined$PC1, na.rm = TRUE)
+  ylims <- range(combined$PC2, na.rm = TRUE)
+
+  return(list(xlims = xlims, ylims = ylims))
+}
+
+extents <- find_pca_extents(logcpm, logcpm_adjusted)
+
+make_pca <- function(logcpm, libraries_full, covars_vect, xlims, ylims) {
+  pca <- prcomp(t(as.matrix(logcpm[,-1])))
+  pve_pc1 <- round(100 * summary(pca)$importance[2,1])
+  pve_pc2 <- round(100 * summary(pca)$importance[2,2])
+  pca_plot <- as.data.frame(pca$x) %>%
+    rownames_to_column(var = "library") %>%
+    left_join(libraries_full, by = "library") %>%
+    ggplot(aes(x = PC1, y = PC2, label = library, color = !!sym(covars_vect[[1]]))) +
+    geom_point(size = 4) +
+    geom_text_repel() +
+    xlab(paste("PC1, ", pve_pc1, "% variance explained", sep ="")) +
+    ylab(paste("PC2, ", pve_pc2, "% variance explained", sep ="")) +
+    coord_fixed(ratio = 1) +
+    xlim(xlims) +
+    ylim(ylims)
+
+  return(pca_plot)
+}
+
+pca <- make_pca(logcpm, libraries_full, covars_vect, extents$xlims, extents$ylims)
+adjusted_pca <- make_pca(logcpm_adjusted, libraries_full, covars_vect, extents$xlims, extents$ylims)
+
+combined_plot <- (pca + ggtitle("Unadjusted")) + (adjusted_pca + ggtitle("Adjusted")) +
+                 plot_layout(guides = 'collect') & theme(legend.position = 'bottom')
+
+pdf(pdf, width = 14, height =7, title = "combined plot")
+combined_plot
+dev.off()
+
+#+end_src
 
 *** Workflow 3: Differential expression contrasts
 
@@ -2385,8 +2583,8 @@ Workflow 2 receives a curated list RNA-seq library IDs and associcated experimen
 #+begin_src snakemake
 rule make_edger_contrast_de:
     input:
-        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/design.rds",
-        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
+        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/design.rds",
+        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
         annotation_tsv = lambda wildcards: f"{ref_dir}/{dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
     log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
     output: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
@@ -2396,32 +2594,48 @@ rule make_edger_contrast_de:
     shell:
         """
         Rscript {params.script} \
-        {input.design} \
-        {input.fit} \
-        {input.annotation_tsv} \
-        "{params.cohorts_str}" \
-        {output} > {log} 2>&1
+        --annotation_tsv {input.annotation_tsv} \
+        --cohorts_str "{params.cohorts_str}" \
+        --design_rds {input.design} \
+        --fit_rds {input.fit} \
+        --res_tsv {output} > {log} 2>&1
         """
 #+end_src
 
 #+begin_src R :tangle ./scripts/make_edger_contrast_de.R
 #!/usr/bin/env Rscript
 
-# Command line arguements
-args = commandArgs(trailingOnly = TRUE)
-design_rds = args[1]
-fit_rds = args[2]
-annotation_tsv = args[3]
-cohorts_str = args[4]
-res_tsv = args[5]
+# ---   Setup   --- #
+# ----------------- #
 
-# Load required packages, data, and functions
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
 library(edgeR)
+library(optparse)
 library(tidyverse)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--annotation_tsv"), type = "character", default = "~/cards/ref/mm10_wtrans_annotation.tsv"),
+  make_option(c("--cohorts_str"), type = "character", default = "cohortgy25_d1 cohortgy0_d1"),
+  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/design.rds"),
+  make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/edger_fit.rds"),
+  make_option(c("--res_tsv"), type = "character", default = "/tmp/test.tsv"))
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
 
 design = readRDS(design_rds)
 fit = readRDS(fit_rds)
 annotation = read_tsv(annotation_tsv)
+
 
 cohorts_vec = strsplit(cohorts_str, " ")[[1]]
 contrast_string <- paste(cohorts_vec[[1]], "-", cohorts_vec[[2]])
@@ -3239,6 +3453,15 @@ names(res)
 :export_file_options: toc:nil
 :END:
 Software is managed with conda. A full list of software versions is at [[file:resources/]]
+
+Generated data is abstracted at the levels of reads, alignments, models, and differential expression contrasts.
+
+Model directories contain normalized counts, model fits, and standardized exploratory data analysis.
+
+Model directories suffixes with _combat are batch corrected using ComBat-seq.
+
+Contrast directories reference a specific model fit to general diffwrentiale fit models
+
 *** Pipeline Directed Acyclic Graphs
 *** Prerequisites for local integration testing
 - See configuation file (./config/int_test.yaml) for required parameters and versioned singularity container

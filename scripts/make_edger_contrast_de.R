@@ -1,20 +1,36 @@
 #!/usr/bin/env Rscript
 
-# Command line arguements
-args = commandArgs(trailingOnly = TRUE)
-design_rds = args[1]
-fit_rds = args[2]
-annotation_tsv = args[3]
-cohorts_str = args[4]
-res_tsv = args[5]
+# ---   Setup   --- #
+# ----------------- #
 
-# Load required packages, data, and functions
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
 library(edgeR)
+library(optparse)
 library(tidyverse)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--annotation_tsv"), type = "character", default = "~/cards/ref/mm10_wtrans_annotation.tsv"),
+  make_option(c("--cohorts_str"), type = "character", default = "cohortgy25_d1 cohortgy0_d1"),
+  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/design.rds"),
+  make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/edger_fit.rds"),
+  make_option(c("--res_tsv"), type = "character", default = "/tmp/test.tsv"))
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
 
 design = readRDS(design_rds)
 fit = readRDS(fit_rds)
 annotation = read_tsv(annotation_tsv)
+
 
 cohorts_vec = strsplit(cohorts_str, " ")[[1]]
 contrast_string <- paste(cohorts_vec[[1]], "-", cohorts_vec[[2]])

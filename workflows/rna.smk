@@ -64,6 +64,21 @@ rule pe_rna_seq_fastp:
         {params.threads} &> {output.cmd}
         """
 
+rule pe_rna_seq_fastqc:
+    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
+    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
+    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
+    params:
+        out_dir = rna_qc_dir,
+        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
+        threads = threads,
+    shell:
+        """
+        {params.script} \
+        {input} \
+        {params.out_dir} {params.threads} &> {log}
+        """
+
 rule pe_quant_with_salmon:
     input:
         index = f"{ref_dir}/{{build}}_salmon",
@@ -86,31 +101,16 @@ rule pe_quant_with_salmon:
         [[ -s {output[0]} ]] || (echo "Output file is empty: {output[0]}" && exit 1)
         """
 
-rule pe_rna_seq_fastqc:
-    input: f"{rna_dir}/fastqs/pe/{{library}}_{{processing}}_{{read}}.fastq.gz",
-    log: f"{log_dir}/{{library}}_{{processing}}_{{read}}_rna_seq_fastqc.log",
-    output: f"{rna_qc_dir}/{{library}}_{{processing}}_{{read}}_fastqc.zip",
-    params:
-        out_dir = rna_qc_dir,
-        script = f"{rna_script_dir}/rna_seq_fastqc.sh",
-        threads = threads,
-    shell:
-        """
-        {params.script} \
-        {input} \
-        {params.out_dir} {params.threads} &> {log}
-        """
 
 
-
-# Make an experimental design for the list of libraries
+# Make an experimental design for the list of libraries.
 
 
 rule make_dge_design:
     input:
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_dge_design.log",
-    output: f"{rna_dir}/models/{{experiment}}/design.rds",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         libs = lambda wildcards: rna_map[wildcards.experiment]['libs'],
@@ -137,7 +137,7 @@ rule make_salmon_txi:
                                           build = rna_map[wildcards.experiment]['build']),
         gtf = lambda wildcards: f"{ref_dir}/{rna_map[wildcards.experiment]['build']}_wtrans.gtf.gz",
     log: f"{log_dir}/{{experiment}}_make_salmon_txi.log",
-    output: f"{rna_dir}/models/{{experiment}}/txi.rds",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
     params:
         script = rna_script_dir + "/make_salmon_txi.R",
     shell:
@@ -154,9 +154,9 @@ rule norm_txi_edger:
         txi = f"{rna_dir}/models/{{experiment}}/txi.rds",
     log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
     output:
-        dge = f"{rna_dir}/models/{{experiment}}/edger_dge.rds",
-        glm = f"{rna_dir}/models/{{experiment}}/edger_fit.rds",
-        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
+        dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
+        glm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_fit.rds",
+        cpm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_cpm.tsv",
     params: script = f"{rna_script_dir}/norm_txi_edger.R",
     shell:
         """
@@ -176,12 +176,12 @@ rule norm_txi_edger:
 
 rule make_cpm_pca:
     input:
-        cpm = f"{rna_dir}/models/{{experiment}}/edger_cpm.tsv",
+        cpm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_cpm.tsv",
         libraries_full = libraries_full_rds,
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
-        f"{rna_dir}/models/{{experiment}}/pca.png",
-        f"{rna_dir}/models/{{experiment}}/pca.svg",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.png",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.svg",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
@@ -194,10 +194,38 @@ rule make_cpm_pca:
         {output} > {log} 2>&1
         """
 
+rule make_rna_batch_corrections:
+    input:
+        design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
+        libs = libraries_full_rds,
+        txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    output:
+        design = f"{rna_dir}/models/combat/{{experiment}}/design.rds",
+        dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
+        glm = f"{rna_dir}/models/combat/{{experiment}}/edger_fit.rds",
+        pca = f"{rna_dir}/models/combat/{{experiment}}/pca.pdf",
+    params:
+        batch_var = lambda wildcards: rna_map[wildcards.experiment]['batch_var'],
+        covars = lambda wildcards: rna_map[wildcards.experiment]['covars'],
+        script = f"{rna_script_dir}/make_rna_batch_corrections.R",
+    shell:
+        """
+	cp {input.design} {output.design}
+	Rscript {params.script} \
+	--batch_var {params.batch_var} \
+	--covars {params.covars} \
+	--design_rds {output.design} \
+	--dge_rds {output.dge} \
+	--glm_rds {output.glm} \
+	--libraries_full_rds {input.libs} \
+	--pdf {output.pca} \
+	--txi_rds {input.txi}
+	"""
+
 rule make_edger_contrast_de:
     input:
-        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/design.rds",
-        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
+        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/design.rds",
+        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
         annotation_tsv = lambda wildcards: f"{ref_dir}/{dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
     log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
     output: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
@@ -207,11 +235,11 @@ rule make_edger_contrast_de:
     shell:
         """
         Rscript {params.script} \
-        {input.design} \
-        {input.fit} \
-        {input.annotation_tsv} \
-        "{params.cohorts_str}" \
-        {output} > {log} 2>&1
+        --annotation_tsv {input.annotation_tsv} \
+        --cohorts_str "{params.cohorts_str}" \
+        --design_rds {input.design} \
+        --fit_rds {input.fit} \
+        --res_tsv {output} > {log} 2>&1
         """
 
 rule rna_volcano:
