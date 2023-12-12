@@ -150,9 +150,9 @@ rule make_salmon_txi:
 
 rule norm_txi_edger:
     input:
-        design = f"{rna_dir}/models/{{experiment}}/design.rds",
-        txi = f"{rna_dir}/models/{{experiment}}/txi.rds",
-    log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
+        design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
+        txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    log: f"{log_dir}/{{experiment}}_unadjusted_norm_txi_edger.log",
     output:
         dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
         glm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_fit.rds",
@@ -221,6 +221,46 @@ rule make_rna_batch_corrections:
 	--pdf {output.pca} \
 	--txi_rds {input.txi}
 	"""
+
+rule model_heatmap_unadjusted:
+    input:
+        dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
+        libs = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_model_heatmap_unadjusted.log",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/heat.pdf",
+    params:
+        fct_str= lambda wildcards: rna_map[wildcards.experiment]['fct_str'],
+        nrow = 100,
+        script = f"{rna_script_dir}/model_heatmap.R",
+    shell:
+        """
+        Rscript {params.script} \
+        --dge_rds {input.dge} \
+        --fct_str "{params.fct_str}" \
+        --libs_rds {input.libs} \
+        --nrow {params.nrow} \
+        --pdf_out {output} > {log} 2>&1
+        """
+
+rule model_heatmap_combat:
+    input:
+        dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
+        libs = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_model_heatmap_combat.log",
+    output: f"{rna_dir}/models/combat/{{experiment}}/heat.pdf",
+    params:
+        fct_str= lambda wildcards: rna_map[wildcards.experiment]['fct_str'],
+        nrow = 100,
+        script = f"{rna_script_dir}/model_heatmap.R",
+    shell:
+        """
+        Rscript {params.script} \
+        --dge_rds {input.dge} \
+        --fct_str "{params.fct_str}" \
+        --libs_rds {input.libs} \
+        --nrow {params.nrow} \
+        --pdf_out {output} > {log} 2>&1
+        """
 
 rule make_edger_contrast_de:
     input:

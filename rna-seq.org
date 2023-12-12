@@ -3,6 +3,53 @@
 :ID:       2a6a5dac-151e-42e8-a80a-74f77ad0d4ca
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes :noweb yes :comments org
 :END:
+a simple heatmap by rowsums
+
+
+#+begin_src R
+#!/usr/bin/env Rscript
+
+# ---   Setup   --- #
+# ----------------- #
+
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
+library(DESeq2)
+library(optparse)
+library(tidyverse)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/nuc/edger_fit.rds")
+)
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
+
+fit <- readRDS(fit_rds)
+
+lrt = glmLRT(fit, coef = 2)
+
+
+res =
+  as.data.frame(topTags(lrt, n = Inf)) %>%
+  rownames_to_column(var = "ensembl_gene_id") %>%
+  as_tibble() %>%
+  left_join(annotation, by = "ensembl_gene_id") %>%
+  mutate(sign = sign(logFC)) %>%
+  mutate(score = sign * -log10(PValue)) %>%
+  mutate(rank = rank(-score, ties.method = "random"))
+
+write_tsv(res, file = res_tsv)
+#+end_src
+
 ** Repository administration
 *** Initialize a local test environment
 #+begin_src bash
@@ -2227,9 +2274,9 @@ saveRDS(txi, file = out_txi)
 #+begin_src snakemake
 rule norm_txi_edger:
     input:
-        design = f"{rna_dir}/models/{{experiment}}/design.rds",
-        txi = f"{rna_dir}/models/{{experiment}}/txi.rds",
-    log: f"{log_dir}/{{experiment}}_norm_txi_edger.log",
+        design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
+        txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    log: f"{log_dir}/{{experiment}}_unadjusted_norm_txi_edger.log",
     output:
         dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
         glm = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_fit.rds",
@@ -2574,6 +2621,126 @@ combined_plot
 dev.off()
 
 #+end_src
+**** Heat maps
+
+#+begin_src R :tangle ./scripts/model_heatmap.R
+#!/usr/bin/env Rscript
+
+# ---   Setup   --- #
+# ----------------- #
+
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
+library(optparse)
+library(ComplexHeatmap)
+library(tidyverse)
+library(ggsci)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--dge_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/edger_dge.rds"),
+  make_option(c("--fct_str"), type = "character", default = "cohort sex run"),
+  make_option(c("--libs_rds"), type = "character", default = "~/cards/data-model/lists/libraries_full.rds"),
+  make_option(c("--nrow"), type = "character", default = "100"),
+  make_option(c("--pdf_out"), type = "character", default = "/tmp/test.pdf")
+)
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
+
+libs <- readRDS(libs_rds)
+dge <- readRDS(dge_rds)
+factor_vec = strsplit(fct_str, " ")[[1]]
+
+# ---   Heatmap   --- #
+# ------------------- #
+
+# Log CPM values
+logcpm <- edgeR::cpm(dge,
+                     normalized.lib.sizes = TRUE,
+                     log = TRUE,
+                     prior.count = 2)
+gene_variances <- apply(logcpm, 1, var)
+top_genes_var <- order(gene_variances, decreasing = TRUE)[1:nrow]
+selected_genes <- logcpm[top_genes_var, ]
+logcpm=selected_genes
+
+# Z score
+mat <- as.matrix(logcpm[,-1])
+rowz <-t(apply(mat, 1, scale))
+colnames(rowz) <- colnames(mat)
+
+# Make column annotations
+col_data <- data.frame(library = colnames(mat)) %>%
+  left_join(libs, by = "library") %>%
+  dplyr::select(all_of(factor_vec))
+col_anno <- HeatmapAnnotation(df = col_data)
+
+heat <- Heatmap(rowz,
+                name = "Z-score",
+                show_row_names = FALSE,
+                top_annotation = col_anno,
+                column_names_rot = 45,
+                column_names_side = "bottom")
+
+pdf(file = pdf_out, width = 10, height = 5)
+draw(heat)
+dev.off()
+
+
+#+end_src
+
+#+begin_src snakemake
+rule model_heatmap_unadjusted:
+    input:
+        dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
+        libs = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_model_heatmap_unadjusted.log",
+    output: f"{rna_dir}/models/unadjusted/{{experiment}}/heat.pdf",
+    params:
+        fct_str= lambda wildcards: rna_map[wildcards.experiment]['fct_str'],
+        nrow = 100,
+        script = f"{rna_script_dir}/model_heatmap.R",
+    shell:
+        """
+        Rscript {params.script} \
+        --dge_rds {input.dge} \
+        --fct_str "{params.fct_str}" \
+        --libs_rds {input.libs} \
+        --nrow {params.nrow} \
+        --pdf_out {output} > {log} 2>&1
+        """
+#+end_src
+
+#+begin_src snakemake
+rule model_heatmap_combat:
+    input:
+        dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
+        libs = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_model_heatmap_combat.log",
+    output: f"{rna_dir}/models/combat/{{experiment}}/heat.pdf",
+    params:
+        fct_str= lambda wildcards: rna_map[wildcards.experiment]['fct_str'],
+        nrow = 100,
+        script = f"{rna_script_dir}/model_heatmap.R",
+    shell:
+        """
+        Rscript {params.script} \
+        --dge_rds {input.dge} \
+        --fct_str "{params.fct_str}" \
+        --libs_rds {input.libs} \
+        --nrow {params.nrow} \
+        --pdf_out {output} > {log} 2>&1
+        """
+#+end_src
+
 
 *** Workflow 3: Differential expression contrasts
 
