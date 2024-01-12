@@ -15,7 +15,7 @@ library(tidyverse)
 
 option_list <- list(
   make_option(c("--annotation_tsv"), type = "character", default = "~/cards/ref/mm10_wtrans_annotation.tsv"),
-  make_option(c("--cohorts_str"), type = "character", default = "cohortgy25_d1 cohortgy0_d1"),
+  make_option(c("--cohorts_str"), type = "character", default = "cohortir1d cohortsham"),
   make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/design.rds"),
   make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/edger_fit.rds"),
   make_option(c("--res_tsv"), type = "character", default = "/tmp/test.tsv"))

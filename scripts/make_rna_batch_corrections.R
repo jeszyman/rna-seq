@@ -21,13 +21,13 @@ library(tidyverse)
 option_list <- list(
   make_option(c("--batch_var"), type = "character", default = "run"),
   make_option(c("--covars"), type = "character", default = "cohort"),
-  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/design.rds"),
+  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/nuc/design.rds"),
   make_option(c("--dge_rds"), type = "character", default = "/tmp/dge.rds"),
   make_option(c("--glm_rds"), type = "character", default = "/tmp/glm.rds"),
   make_option(c("--libraries_full_rds"), type = "character", default = "~/cards/data-model/lists/libraries_full.rds"),
   make_option(c("--adjusted_rds"), type = "character", default = "/tmp/adjusted.rds"),
   make_option(c("--pdf"), type = "character", default = "/tmp/adjusted.pdf"),
-  make_option(c("--txi_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/txi.rds")
+  make_option(c("--txi_rds"), type = "character", default = "~/cards/analysis/rna/models/unadjusted/nuc/txi.rds")
 )
 
 opts <- parse_args(OptionParser(option_list = option_list))
@@ -119,19 +119,6 @@ saveRDS(fit, file = glm_rds)
 # ---   Make PCAs   --- #
 # --------------------- #
 
-find_pca_extents <- function(logcpm1, logcpm2) {
-  pca1 <- prcomp(t(as.matrix(logcpm1[,-1])))
-  pca2 <- prcomp(t(as.matrix(logcpm2[,-1])))
-
-  combined <- rbind(as.data.frame(pca1$x), as.data.frame(pca2$x))
-  xlims <- range(combined$PC1, na.rm = TRUE)
-  ylims <- range(combined$PC2, na.rm = TRUE)
-
-  return(list(xlims = xlims, ylims = ylims))
-}
-
-extents <- find_pca_extents(logcpm, logcpm_adjusted)
-
 make_pca <- function(logcpm, libraries_full, covars_vect, xlims, ylims) {
   pca <- prcomp(t(as.matrix(logcpm[,-1])))
   pve_pc1 <- round(100 * summary(pca)$importance[2,1])
@@ -144,9 +131,7 @@ make_pca <- function(logcpm, libraries_full, covars_vect, xlims, ylims) {
     geom_text_repel() +
     xlab(paste("PC1, ", pve_pc1, "% variance explained", sep ="")) +
     ylab(paste("PC2, ", pve_pc2, "% variance explained", sep ="")) +
-    coord_fixed(ratio = 1) +
-    xlim(xlims) +
-    ylim(ylims)
+    coord_fixed(ratio = 1)
 
   return(pca_plot)
 }

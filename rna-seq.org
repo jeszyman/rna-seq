@@ -3,53 +3,6 @@
 :ID:       2a6a5dac-151e-42e8-a80a-74f77ad0d4ca
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes :noweb yes :comments org
 :END:
-a simple heatmap by rowsums
-
-
-#+begin_src R
-#!/usr/bin/env Rscript
-
-# ---   Setup   --- #
-# ----------------- #
-
-## ---   Load Packages   --- ##
-## ------------------------- ##
-
-library(DESeq2)
-library(optparse)
-library(tidyverse)
-
-## ---   Load Inputs   --- ##
-## ----------------------- ##
-
-option_list <- list(
-  make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/nuc/edger_fit.rds")
-)
-
-opts <- parse_args(OptionParser(option_list = option_list))
-
-list_of_options <- names(opts)
-for (opt_name in list_of_options) {
-  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
-}
-
-fit <- readRDS(fit_rds)
-
-lrt = glmLRT(fit, coef = 2)
-
-
-res =
-  as.data.frame(topTags(lrt, n = Inf)) %>%
-  rownames_to_column(var = "ensembl_gene_id") %>%
-  as_tibble() %>%
-  left_join(annotation, by = "ensembl_gene_id") %>%
-  mutate(sign = sign(logFC)) %>%
-  mutate(score = sign * -log10(PValue)) %>%
-  mutate(rank = rank(-score, ties.method = "random"))
-
-write_tsv(res, file = res_tsv)
-#+end_src
-
 ** Repository administration
 *** Initialize a local test environment
 #+begin_src bash
@@ -271,6 +224,49 @@ CLOSED: [2022-10-26 Wed 13:48]
 :END:
 *** Generate heatmap at results step
 *** TEST Likelihood ratio test
+#+begin_src R
+#!/usr/bin/env Rscript
+
+# ---   Setup   --- #
+# ----------------- #
+
+## ---   Load Packages   --- ##
+## ------------------------- ##
+
+library(DESeq2)
+library(optparse)
+library(tidyverse)
+
+## ---   Load Inputs   --- ##
+## ----------------------- ##
+
+option_list <- list(
+  make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/nuc/edger_fit.rds")
+)
+
+opts <- parse_args(OptionParser(option_list = option_list))
+
+list_of_options <- names(opts)
+for (opt_name in list_of_options) {
+  assign(opt_name, opts[[opt_name]], envir = .GlobalEnv)
+}
+
+fit <- readRDS(fit_rds)
+
+lrt = glmLRT(fit, coef = 2)
+
+
+res =
+  as.data.frame(topTags(lrt, n = Inf)) %>%
+  rownames_to_column(var = "ensembl_gene_id") %>%
+  as_tibble() %>%
+  left_join(annotation, by = "ensembl_gene_id") %>%
+  mutate(sign = sign(logFC)) %>%
+  mutate(score = sign * -log10(PValue)) %>%
+  mutate(rank = rank(-score, ties.method = "random"))
+
+write_tsv(res, file = res_tsv)
+#+end_src
 #+begin_src snakemake
 rule make_edger_lrt:
     input:
@@ -2362,7 +2358,7 @@ rule make_cpm_pca:
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
         f"{rna_dir}/models/unadjusted/{{experiment}}/pca.png",
-        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.svg",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.pdf",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
@@ -2383,7 +2379,7 @@ cpm_tsv = args[1]
 formula = args[2]
 libraries_full_rds = args[3]
 out_png = args[4]
-out_svg = args[5]
+out_pdf = args[5]
 
 factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula)
 factor_str = trimws(factor_str)
@@ -2422,7 +2418,7 @@ if (length(factor_vec) >= 2 && !is.null(factor_vec[[2]])) {
 }
 
 ggsave(filename = out_png, plot = plot, device = "png", width = 8, height = 6)
-ggsave(filename = out_svg, plot = plot, device = "svg", width = 8, height = 6)
+ggsave(filename = out_pdf, plot = plot, device = "pdf", width = 8, height = 6)
 
 #+end_src
 **** Batch correction with ComBat-seq
@@ -2432,6 +2428,7 @@ rule make_rna_batch_corrections:
         design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
         libs = libraries_full_rds,
         txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    log: f"{log_dir}/{{experiment}}_make_rna_batch_corrections.log",
     output:
         design = f"{rna_dir}/models/combat/{{experiment}}/design.rds",
         dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
@@ -2452,11 +2449,11 @@ rule make_rna_batch_corrections:
 	--glm_rds {output.glm} \
 	--libraries_full_rds {input.libs} \
 	--pdf {output.pca} \
-	--txi_rds {input.txi}
+	--txi_rds {input.txi} > {log} 2>&1
 	"""
 #+end_src
 
-#+begin_src bash :tangle ./scripts/make_rna_batch_corrections.R
+#+begin_src R :tangle ./scripts/make_rna_batch_corrections.R
 #!/usr/bin/env Rscript
 
 # ---   Setup   --- #
@@ -2480,13 +2477,13 @@ library(tidyverse)
 option_list <- list(
   make_option(c("--batch_var"), type = "character", default = "run"),
   make_option(c("--covars"), type = "character", default = "cohort"),
-  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/design.rds"),
+  make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/nuc/design.rds"),
   make_option(c("--dge_rds"), type = "character", default = "/tmp/dge.rds"),
   make_option(c("--glm_rds"), type = "character", default = "/tmp/glm.rds"),
   make_option(c("--libraries_full_rds"), type = "character", default = "~/cards/data-model/lists/libraries_full.rds"),
   make_option(c("--adjusted_rds"), type = "character", default = "/tmp/adjusted.rds"),
   make_option(c("--pdf"), type = "character", default = "/tmp/adjusted.pdf"),
-  make_option(c("--txi_rds"), type = "character", default = "~/cards/analysis/rna/models/hrt/txi.rds")
+  make_option(c("--txi_rds"), type = "character", default = "~/cards/analysis/rna/models/unadjusted/nuc/txi.rds")
 )
 
 opts <- parse_args(OptionParser(option_list = option_list))
@@ -2578,19 +2575,6 @@ saveRDS(fit, file = glm_rds)
 # ---   Make PCAs   --- #
 # --------------------- #
 
-find_pca_extents <- function(logcpm1, logcpm2) {
-  pca1 <- prcomp(t(as.matrix(logcpm1[,-1])))
-  pca2 <- prcomp(t(as.matrix(logcpm2[,-1])))
-
-  combined <- rbind(as.data.frame(pca1$x), as.data.frame(pca2$x))
-  xlims <- range(combined$PC1, na.rm = TRUE)
-  ylims <- range(combined$PC2, na.rm = TRUE)
-
-  return(list(xlims = xlims, ylims = ylims))
-}
-
-extents <- find_pca_extents(logcpm, logcpm_adjusted)
-
 make_pca <- function(logcpm, libraries_full, covars_vect, xlims, ylims) {
   pca <- prcomp(t(as.matrix(logcpm[,-1])))
   pve_pc1 <- round(100 * summary(pca)$importance[2,1])
@@ -2603,9 +2587,7 @@ make_pca <- function(logcpm, libraries_full, covars_vect, xlims, ylims) {
     geom_text_repel() +
     xlab(paste("PC1, ", pve_pc1, "% variance explained", sep ="")) +
     ylab(paste("PC2, ", pve_pc2, "% variance explained", sep ="")) +
-    coord_fixed(ratio = 1) +
-    xlim(xlims) +
-    ylim(ylims)
+    coord_fixed(ratio = 1)
 
   return(pca_plot)
 }
@@ -2750,13 +2732,13 @@ Workflow 2 receives a curated list RNA-seq library IDs and associcated experimen
 #+begin_src snakemake
 rule make_edger_contrast_de:
     input:
-        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/design.rds",
-        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
-        annotation_tsv = lambda wildcards: f"{ref_dir}/{dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
+        design = lambda wildcards: f"{rna_dir}/models/{rna_dge_map[wildcards.contrast]['correction']}/{rna_dge_map[wildcards.contrast]['model']}/design.rds",
+        fit = lambda wildcards: f"{rna_dir}/models/{rna_dge_map[wildcards.contrast]['correction']}/{rna_dge_map[wildcards.contrast]['model']}/edger_fit.rds",
+        annotation_tsv = lambda wildcards: f"{ref_dir}/{rna_dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
     log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
     output: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
     params:
-        cohorts_str = lambda wildcards: dge_map[wildcards.contrast]['cohorts_str'],
+        cohorts_str = lambda wildcards: rna_dge_map[wildcards.contrast]['cohorts_str'],
         script = f"{rna_script_dir}/make_edger_contrast_de.R",
     shell:
         """
@@ -2787,7 +2769,7 @@ library(tidyverse)
 
 option_list <- list(
   make_option(c("--annotation_tsv"), type = "character", default = "~/cards/ref/mm10_wtrans_annotation.tsv"),
-  make_option(c("--cohorts_str"), type = "character", default = "cohortgy25_d1 cohortgy0_d1"),
+  make_option(c("--cohorts_str"), type = "character", default = "cohortir1d cohortsham"),
   make_option(c("--design_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/design.rds"),
   make_option(c("--fit_rds"), type = "character", default = "~/cards/analysis/rna/models/combat/hrt/edger_fit.rds"),
   make_option(c("--res_tsv"), type = "character", default = "/tmp/test.tsv"))
@@ -2879,6 +2861,10 @@ plot = ggplot(table, aes(x = logFC, y = -log10(FDR), label = label)) +
 ggsave(plot, file = out_pdf)
 #+end_src
 **** GSEA
+solve s2n
+
+https://www.google.com/search?q=fgsea+signal+to+noise&oq=fgsea+signal+to+noise&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQLhhA0gEIMzU5NGowajGoAgCwAgA&sourceid=chrome&ie=UTF-8
+https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1674-0#Sec8
 #+begin_src snakemake
 rule gsea_from_edger:
     input: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",

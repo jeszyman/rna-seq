@@ -181,7 +181,7 @@ rule make_cpm_pca:
     log: f"{log_dir}/{{experiment}}_make_cpm_pca.log",
     output:
         f"{rna_dir}/models/unadjusted/{{experiment}}/pca.png",
-        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.svg",
+        f"{rna_dir}/models/unadjusted/{{experiment}}/pca.pdf",
     params:
         formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
         script = f"{rna_script_dir}/make_cpm_pca.R",
@@ -199,6 +199,7 @@ rule make_rna_batch_corrections:
         design = f"{rna_dir}/models/unadjusted/{{experiment}}/design.rds",
         libs = libraries_full_rds,
         txi = f"{rna_dir}/models/unadjusted/{{experiment}}/txi.rds",
+    log: f"{log_dir}/{{experiment}}_make_rna_batch_corrections.log",
     output:
         design = f"{rna_dir}/models/combat/{{experiment}}/design.rds",
         dge = f"{rna_dir}/models/combat/{{experiment}}/edger_dge.rds",
@@ -219,7 +220,7 @@ rule make_rna_batch_corrections:
 	--glm_rds {output.glm} \
 	--libraries_full_rds {input.libs} \
 	--pdf {output.pca} \
-	--txi_rds {input.txi}
+	--txi_rds {input.txi} > {log} 2>&1
 	"""
 
 rule model_heatmap_unadjusted:
@@ -264,13 +265,13 @@ rule model_heatmap_combat:
 
 rule make_edger_contrast_de:
     input:
-        design = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/design.rds",
-        fit = lambda wildcards: f"{rna_dir}/models/{dge_map[wildcards.contrast]['correction']}/{dge_map[wildcards.contrast]['model']}/edger_fit.rds",
-        annotation_tsv = lambda wildcards: f"{ref_dir}/{dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
+        design = lambda wildcards: f"{rna_dir}/models/{rna_dge_map[wildcards.contrast]['correction']}/{rna_dge_map[wildcards.contrast]['model']}/design.rds",
+        fit = lambda wildcards: f"{rna_dir}/models/{rna_dge_map[wildcards.contrast]['correction']}/{rna_dge_map[wildcards.contrast]['model']}/edger_fit.rds",
+        annotation_tsv = lambda wildcards: f"{ref_dir}/{rna_dge_map[wildcards.contrast]['build']}_wtrans_annotation.tsv",
     log: f"{log_dir}/{{contrast}}_make_edger_contrast_de.log",
     output: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",
     params:
-        cohorts_str = lambda wildcards: dge_map[wildcards.contrast]['cohorts_str'],
+        cohorts_str = lambda wildcards: rna_dge_map[wildcards.contrast]['cohorts_str'],
         script = f"{rna_script_dir}/make_edger_contrast_de.R",
     shell:
         """

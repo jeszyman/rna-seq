@@ -4,7 +4,7 @@ cpm_tsv = args[1]
 formula = args[2]
 libraries_full_rds = args[3]
 out_png = args[4]
-out_svg = args[5]
+out_pdf = args[5]
 
 factor_str = gsub("(~0 \\+)|\\s*\\*\\s*|\\s*\\+\\s*", " ", formula)
 factor_str = trimws(factor_str)
@@ -43,4 +43,4 @@ if (length(factor_vec) >= 2 && !is.null(factor_vec[[2]])) {
 }
 
 ggsave(filename = out_png, plot = plot, device = "png", width = 8, height = 6)
-ggsave(filename = out_svg, plot = plot, device = "svg", width = 8, height = 6)
+ggsave(filename = out_pdf, plot = plot, device = "pdf", width = 8, height = 6)
