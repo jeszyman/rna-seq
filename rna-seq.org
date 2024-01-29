@@ -2,6 +2,7 @@
 :PROPERTIES:
 :ID:       2a6a5dac-151e-42e8-a80a-74f77ad0d4ca
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes :noweb yes :comments org
+:RESET_CHECK_BOXES: t
 :END:
 ** Repository administration
 *** Initialize a local test environment
