@@ -223,6 +223,26 @@ rule make_rna_batch_corrections:
 	--txi_rds {input.txi} > {log} 2>&1
 	"""
 
+rule make_rlog_matrix:
+    input:
+        dge = f"{rna_dir}/models/{{adjustment}}/{{experiment}}/edger_dge.rds",
+        libs = libraries_full_rds,
+    log: f"{log_dir}/{{experiment}}_{{adjustment}}_make_rlog_matrix.log",
+    output:
+        f"{rna_dir}/models/{{adjustment}}/{{experiment}}/rlog_mat.rds"
+    params:
+        formula = lambda wildcards: rna_map[wildcards.experiment]['formula'],
+        script = f"{rna_script_dir}/make_rlog_matrix.R",
+    shell:
+        """
+        Rscript {params.script} \
+        --dge_rds {input.dge} \
+        --formula_string "{params.formula}" \
+        --libraries_full_rds {input.libs} \
+        --out_mat_file {output} \
+        > {log} 2>&1
+        """
+
 rule model_heatmap_unadjusted:
     input:
         dge = f"{rna_dir}/models/unadjusted/{{experiment}}/edger_dge.rds",
@@ -295,6 +315,12 @@ rule rna_volcano:
         {output} \
         > {log} 2>&1
         """
+
+
+# solve s2n
+
+# https://www.google.com/search?q=fgsea+signal+to+noise&oq=fgsea+signal+to+noise&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIGCAEQLhhA0gEIMzU5NGowajGoAgCwAgA&sourceid=chrome&ie=UTF-8
+# https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-017-1674-0#Sec8
 
 rule gsea_from_edger:
     input: f"{rna_dir}/contrasts/{{contrast}}/edger_dge.tsv",

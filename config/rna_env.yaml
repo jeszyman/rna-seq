@@ -19,22 +19,9 @@ dependencies:
   - bioconductor-ruvseq
   - bioconductor-rsamtools
   - bioconductor-tximport
-  - bowtie2
-  - fastp
-  - fastqc
-  - multiqc
-  - pandas
-  - parallel
-  - r-magick
-  - r-ggrepel
-  - r-ggextra
-  - r-ggsci
   - r-msigdbr
+  - r-enrichr
+  - salmon
   - r-pheatmap
   - r-rstatix
-  - r-ggpattern
-  - r-tidyverse
-  - r-yaml
   - rseqc
-  - samtools
-  - snakemake
