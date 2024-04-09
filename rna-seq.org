@@ -4,6 +4,9 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes :noweb yes :comments org
 :RESET_CHECK_BOXES: t
 :END:
+- cite:sahraeian2017
+- cite:costa-silva2017
+- cite:conesa2016
 ** Repository administration
 *** Initialize a local test environment
 #+begin_src bash
@@ -1859,7 +1862,7 @@ testscale = gsva(mouse_scale, msigdbr_list, kcdf="Poisson")
 :CUSTOM_ID:      5626df9f-63f0-4ea3-8736-80bda68ece56
 :END:
 
-Bulk RNA-seq reads were adapter-trimmed using fastp [[cite:&chen2018b]] and read quality was assessed using FastQC [[cite:&andrews2010]]. Transcript abundance was quantified using salmon [[cite:&patro2017]] and transcript abundance was aggregated to gene-level counts using tximport [[cite:&soneson2016tximport]]. Counts for all protein coding and long non-coding RNA genes were aggregated. Gene abundance counts normalized in EdgeR [[cite:&chen2008]]. Count-level quality control included principal component analysis. Batch correction was performed in ComBat-seq [[cite:&zhang2020combat]]. Differential expression was also determined in EdgeR using glmQLFTest for individual cohort contrasts. Gene set enrichment analysis was performed in the fgsea R package [[cite:&korotkevich2016fgsea]] with pathway sets from the msigdbr package [[cite:&dolgalev2022msigdbr]].
+Bulk RNA-seq reads were adapter-trimmed using fastp [[cite:&chen2018fastp]] and read quality was assessed using FastQC [[cite:&andrews2010]]. Transcript abundance was quantified using salmon [[cite:&patro2017]] and transcript abundance was aggregated to gene-level counts using tximport [[cite:&soneson2016tximport]]. Counts for all protein coding and long non-coding RNA genes were aggregated. Gene abundance counts were normalized in EdgeR [[cite:&chen2008]]. Count-level quality control included principal component analysis. Batch correction for sequencing runs was performed in ComBat-seq [[cite:&zhang2020combat]]. Differential expression was also determined in EdgeR using glmQLFTest for individual cohort contrasts. Gene set enrichment analysis was performed in the fgsea R package [[cite:&korotkevich2016fgsea]] with pathway sets from the msigdbr package [[cite:&dolgalev2022msigdbr]].
 
 *** Workflow 1: Initial processing
 **** Preamble
@@ -2255,6 +2258,7 @@ saveRDS(txi, file = out_txi)
 #+end_src
 
 ***** Normalize txi counts across the experimental design for use in edgeR
+Normalize txi counts across the experimental design for use in edgeR
 #+begin_src snakemake
 rule norm_txi_edger:
     input:
