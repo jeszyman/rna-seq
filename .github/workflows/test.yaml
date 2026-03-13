@@ -1,0 +1,20 @@
+name: Pipeline Test
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: true
+      - name: Install snakemake
+        run: conda install -c conda-forge -c bioconda snakemake
+      - name: Dry run
+        run: snakemake -s workflows/test.smk --dry-run
+      - name: Full pipeline test
+        run: snakemake -s workflows/test.smk --use-conda --cores 4

@@ -1,0 +1,27 @@
+name: Generate Test Data
+on:
+  workflow_dispatch:
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: true
+      - name: Install SRA toolkit
+        run: conda install -c bioconda sra-tools samtools
+      - name: Run get_test_data.sh
+        run: bash tools/get_test_data.sh
+      - name: Validate outputs
+        run: |
+          test -f tests/full/inputs/mm10_chr19.fa.gz
+          test -f tests/full/inputs/mm10_chr19.gtf.gz
+          test -f tests/full/inputs/hg38_chr22.fa.gz
+          test -f tests/full/inputs/hg38_chr22.gtf.gz
+          for i in $(seq 1 8); do
+            lib=$(printf "lib%03d" $i)
+            test -f "tests/full/inputs/${lib}_R1.fastq.gz"
+            test -f "tests/full/inputs/${lib}_R2.fastq.gz"
+          done
+          echo "All test data files validated"

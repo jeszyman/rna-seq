@@ -1,0 +1,12 @@
+# config/rnaseq-align-conda-env.yaml
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - fastp
+  - fastqc
+  - multiqc
+  - salmon
+  - samtools
+  - star
+  - subread
