@@ -195,6 +195,14 @@ Same as emseq's meth_map:
 ```python
 de_map = config["de-map"]
 
+# Helper: resolve count matrix input based on align_method
+# STAR path → featureCounts TSV, Salmon path → txi.rds
+def get_count_matrix(wc, de_map):
+    if wc.align_method == "star":
+        return f"{D_RNASEQ}/counts/{wc.experiment}.star.featurecounts.tsv"
+    elif wc.align_method == "salmon":
+        return f"{D_RNASEQ}/counts/{wc.experiment}.salmon.txi.rds"
+
 # In rules — resolve per-experiment params:
 rule rnaseq_deseq2:
     input:
@@ -204,12 +212,22 @@ rule rnaseq_deseq2:
         design = lambda wc: de_map[wc.experiment]["design"],
         contrast = lambda wc: " ".join(de_map[wc.experiment]["contrast"]),
         orgdb = lambda wc: de_map[wc.experiment]["orgdb"],
+        # Pass input type so R script knows format
+        input_type = lambda wc: "featurecounts" if wc.align_method == "star" else "tximport",
     ...
 
-# In rule all — expand across experiments and methods:
-expand("{D_RNASEQ}/de/{experiment}.{align_method}.deseq2_results.tsv",
-       experiment=[e for e in de_map if "deseq2" in de_map[e]["tools"]],
-       align_method=lambda: de_map[e]["align_method"]),
+# In rule all — expand across experiments, methods, and tools:
+# Use list comprehension to build (experiment, align_method) pairs from de_map
+[f"{D_RNASEQ}/de/{exp}.{am}.deseq2_results.tsv"
+ for exp in de_map
+ if "deseq2" in de_map[exp]["tools"]
+ for am in de_map[exp]["align_method"]],
+
+# BAM-only QC (RSeQC, Qualimap) — only expand for STAR path:
+[f"{D_RNASEQ}/qc/{lib}.{de_map[exp]['ref_name']}.rseqc.txt"
+ for exp in de_map
+ if "star" in de_map[exp]["align_method"]
+ for lib in de_map[exp]["libs"]],
 ```
 
 ### Rules Summary (16 rules in rnaseq.smk)
@@ -278,24 +296,29 @@ All tangled from org to `scripts/`, all use argparse for CLI args:
 - Builds tx2gene from GTF, runs tximport
 
 ### rnaseq_eda.R
-- Input: count matrix (featureCounts TSV or txi.rds), sample metadata TSV, design formula
+- Args: `--counts` (path), `--input-type` ("featurecounts" or "tximport"), `--sample-tsv` (path), `--design` (formula string), `--out-pca` (PDF path), `--out-rds` (RDS path)
+- If input_type is "featurecounts": reads TSV, creates DGEList from raw counts
+- If input_type is "tximport": loads RDS, applies tximport offset normalization to DGEList
+- Both paths: TMM normalization, filterByExpr, PCA on logCPM
 - Output: PCA plot PDF, EDA RDS (design, logCPM, PCA, DGEList)
-- edgeR TMM normalization, filterByExpr, PCA on logCPM
 
 ### rnaseq_deseq2.R
-- Input: count matrix, sample TSV, design formula, contrast vector
-- Output: results TSV (gene, log2FC, padj, baseMean), volcano PDF, MA PDF
-- DESeqDataSet → DESeq() → results() with contrast
+- Args: `--counts` (path), `--input-type`, `--sample-tsv`, `--design`, `--contrast` (space-separated: factor level_test level_ref), `--out-tsv`, `--out-volcano`, `--out-ma`
+- If input_type is "featurecounts": DESeqDataSetFromMatrix
+- If input_type is "tximport": DESeqDataSetFromTximport
+- DESeq() → results(contrast=c(...)) → write TSV (gene, baseMean, log2FC, lfcSE, stat, pvalue, padj)
 
 ### rnaseq_edger.R
-- Input: count matrix, sample TSV, design formula, contrast vector
-- Output: results TSV, volcano PDF, MA PDF
+- Args: same pattern as deseq2
+- If input_type is "tximport": applies tximport length offset via scaleOffset
 - DGEList → calcNormFactors → estimateDisp → glmQLFit → glmQLFTest
+- Output: results TSV (same columns), volcano PDF, MA PDF
 
 ### rnaseq_limma.R
-- Input: count matrix, sample TSV, design formula, contrast vector
-- Output: results TSV, volcano PDF, MA PDF
-- voom → lmFit → contrasts.fit → eBayes → topTable
+- Args: same pattern as deseq2
+- If input_type is "tximport": applies tximport length offset
+- voom → lmFit → makeContrasts → contrasts.fit → eBayes → topTable
+- Output: results TSV (same columns), volcano PDF, MA PDF
 
 ### rnaseq_enrichment.R
 - Input: DE results TSV (log2FC + padj), orgdb name
