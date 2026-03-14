@@ -4,7 +4,7 @@
 
 main-data-dir: tests/full
 
-sample-tsv-path: ${HOME}/repos/rna-seq/data/test-samples.tsv
+sample-tsv-path: data/test-samples.tsv
 
 refs:
   mm10_chr19:

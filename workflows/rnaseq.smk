@@ -280,7 +280,6 @@ rule rnaseq_tximport:
 
 rule rnaseq_merge_featurecounts:
     message: "Merge per-library featureCounts into experiment count matrix"
-    conda: ENV_R
     input:
         counts = lambda wc: expand(
             f"{D_RNASEQ}/counts/{{library_id}}.{{ref_name}}.star.featurecounts.tsv",
@@ -424,7 +423,11 @@ rule rnaseq_multiqc:
     message: "MultiQC aggregation of QC reports"
     conda: ENV_ALIGN
     input:
-        qc_dir = f"{D_RNASEQ}/qc",
+        # MultiQC does NOT prompt inputs to run — list explicit trigger files
+        fastp = expand(
+            f"{D_RNASEQ}/qc/{{library_id}}_fastp.json",
+            library_id=RNASEQ_LIBRARY_IDS,
+        ),
     log:
         cmd = f"{D_LOGS}/rnaseq_multiqc.log",
     benchmark:
@@ -433,13 +436,14 @@ rule rnaseq_multiqc:
     output:
         html = f"{D_RNASEQ}/qc/multiqc.html",
     params:
+        qc_dir  = f"{D_RNASEQ}/qc",
         out_dir = f"{D_RNASEQ}/qc",
     shell:
         """
         exec &>> "{log.cmd}"
         echo "[MultiQC] $(date)"
 
-        multiqc "{input.qc_dir}" \
+        multiqc "{params.qc_dir}" \
           --outdir "{params.out_dir}" \
           --filename multiqc.html \
           --force
