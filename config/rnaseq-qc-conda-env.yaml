@@ -1,0 +1,8 @@
+# config/rnaseq-qc-conda-env.yaml
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - qualimap
+  - rseqc
+  - ucsc-gtftogenepred

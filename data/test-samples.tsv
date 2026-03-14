@@ -1,0 +1,9 @@
+library_id	r1_basename	r2_basename	group	organism
+lib001	lib001_R1.fastq.gz	lib001_R2.fastq.gz	ctrl	mouse
+lib002	lib002_R1.fastq.gz	lib002_R2.fastq.gz	ctrl	mouse
+lib003	lib003_R1.fastq.gz	lib003_R2.fastq.gz	exp	mouse
+lib004	lib004_R1.fastq.gz	lib004_R2.fastq.gz	exp	mouse
+lib005	lib005_R1.fastq.gz	lib005_R2.fastq.gz	normal	human
+lib006	lib006_R1.fastq.gz	lib006_R2.fastq.gz	normal	human
+lib007	lib007_R1.fastq.gz	lib007_R2.fastq.gz	tumor	human
+lib008	lib008_R1.fastq.gz	lib008_R2.fastq.gz	tumor	human

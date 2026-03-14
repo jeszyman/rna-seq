@@ -1,0 +1,43 @@
+# config/test.yaml
+# Test pipeline configuration for RNA-seq biopipe module.
+# AUTO-GENERATED — DO NOT EDIT DIRECTLY (tangled from rna-seq.org)
+
+main-data-dir: tests/full
+
+sample-tsv-path: data/test-samples.tsv
+
+refs:
+  mm10_chr19:
+    fasta: tests/full/inputs/mm10_chr19.fa.gz
+    gtf: tests/full/inputs/mm10_chr19.gtf.gz
+    star_sa_bases: 11
+  hg38_chr22:
+    fasta: tests/full/inputs/hg38_chr22.fa.gz
+    gtf: tests/full/inputs/hg38_chr22.gtf.gz
+    star_sa_bases: 11
+
+envs:
+  align: "${HOME}/repos/rna-seq/config/rnaseq-align-conda-env.yaml"
+  qc: "${HOME}/repos/rna-seq/config/rnaseq-qc-conda-env.yaml"
+  r: "${HOME}/repos/rna-seq/config/rnaseq-r-env.yaml"
+
+repos:
+  rnaseq: .
+
+de-map:
+  mouse_test:
+    libs: ["lib001", "lib002", "lib003", "lib004"]
+    ref_name: mm10_chr19
+    align_method: ["star", "salmon"]
+    design: "~ group"
+    contrast: ["group", "exp", "ctrl"]
+    tools: ["deseq2", "edger", "limma"]
+    orgdb: "org.Mm.eg.db"
+  human_test:
+    libs: ["lib005", "lib006", "lib007", "lib008"]
+    ref_name: hg38_chr22
+    align_method: ["star", "salmon"]
+    design: "~ group"
+    contrast: ["group", "tumor", "normal"]
+    tools: ["deseq2", "edger", "limma"]
+    orgdb: "org.Hs.eg.db"
