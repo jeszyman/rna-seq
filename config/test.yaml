@@ -17,9 +17,9 @@ refs:
     star_sa_bases: 11
 
 envs:
-  align: config/rnaseq-align-conda-env.yaml
-  qc: config/rnaseq-qc-conda-env.yaml
-  r: config/rnaseq-r-env.yaml
+  align: "${HOME}/repos/rna-seq/config/rnaseq-align-conda-env.yaml"
+  qc: "${HOME}/repos/rna-seq/config/rnaseq-qc-conda-env.yaml"
+  r: "${HOME}/repos/rna-seq/config/rnaseq-r-env.yaml"
 
 repos:
   rnaseq: .
