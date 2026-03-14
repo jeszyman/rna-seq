@@ -15,15 +15,15 @@
 :END:
 - http://bioinformatics.sdstate.edu/idep/
 - https://nf-co.re/rnaseq/3.13.2
-- https://www.nature.com/articles/s41598-020-76881-x
-- https://www.cell.com/ajhg/fulltext/S0002-9297(18)30401-4
+- Systematic comparison of RNA-seq quantification procedures (alignment vs pseudoalignment, normalization methods) showing STAR+HTSeq and Salmon+tximport yield similar results [cite:@corchete2020].
+- OUTRIDER: statistical method for detecting aberrantly expressed genes in RNA-seq data using a denoising autoencoder to control for latent confounders [cite:@brechtmann2018].
 **** RNA-seq experimental design
 :PROPERTIES:
 :ID:       19780d7c-afa7-4195-b1f9-df9c563de303
 :END:
 - https://www.biostars.org/p/9549394/
 - https://hbctraining.github.io/DGE_workshop/lessons/08_DGE_LRT.html
-- https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7873980/
+- - Guide to creating design matrices for gene expression experiments with practical examples for factorial, additive, and interaction models [cite:@law2020].
 - https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#design-matrices-with-and-without-intercept-term
 - https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#design-matrices-with-and-without-intercept-term
 - https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2021/RNAseq/Markdowns/09_Linear_Models.html
@@ -31,13 +31,13 @@
   - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4538800/
 - validation technologies
   - cannot distinguish isomiRs
-  - qPCR expected to correlate >.9 w/ seq expression > 2^8 cite:yeri2018
-  - qPCR more concordant than EdgeSeq or FirePlex cite:yeri2018
+  - qPCR expected to correlate >.9 w/ seq expression > 2^8 [cite:@yeri2018]
+  - qPCR more concordant than EdgeSeq or FirePlex [cite:@yeri2018]
 - what depth? https://www.researchgate.net/post/how_many_million_reads_for_miRNA_discovery
 - reads per sample
   - https://www.qiagen.com/us/resources/faq?id=a119d5f0-0a2a-4612-828e-d8fa3cc37891&lang=en
-- cite:garve2012
-- cite:williams2014
+- [cite:@garve2012]
+- [cite:@williams2014]
 - https://www.degruyter.com/view/journals/sagmb/18/1/article-20180021.xml?language=en
 - https://ucdavis-bioinformatics-training.github.io/2018-June-RNA-Seq-Workshop/tuesday/ExperimentalDesign.pdf
 - http://scotty.genetics.utah.edu/help.html
@@ -49,10 +49,10 @@
   - biological variation is more important than technical variation- See Bullard,10 Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments, fig. 4
   - adding depth vs. replicate- replicates preferred, gives less uncertainty
   - remember, more comparisons require more replicates
-  - cite:schurch2016
+  - [cite:@schurch2016]
   - Power
     - https://cofactorgenomics.com/6-changes-thatll-make-big-difference-rna-seq-part-5/
-    - cite:peixoto2015
+    - [cite:@peixoto2015]
     - the rewards in statistical power due to additional biological replicates will surpass the improved parameterization of technical variation garnered from additional technical replicates
     - low counts mean low power- see rna seqlopedia fig 1.1
   - [[http://scotty.genetics.utah.edu/help.html][Scotty]]
@@ -64,7 +64,7 @@
       - need bio replicates
       - stranded and paired library prep not required
 - Prefer “balanced block” design w/ barcode-> mixed prep-> all samples on all lanes
-- cite:auer2010
+- [cite:@auer2010]
 
 ***** General reference
 :PROPERTIES:
@@ -76,7 +76,7 @@
 :PROPERTIES:
 :ID:       2edf5837-5b50-490f-9e61-73151a280483
 :END:
-- cite:williams2014
+- [cite:@williams2014]
   - contains the 30-50 mil read for DE recommendation
 ****** Parameters affecting sequencing
 :PROPERTIES:
@@ -86,7 +86,7 @@
     - low @ low counts b/c Poisson
     - low @ high counts b/c?
   - biological
-    - transcript abundence 10^5-10^7 see cite:Griffith_2015 refs 85,86
+    - transcript abundence 10^5-10^7 see [cite:@Griffith_2015] refs 85,86
   - technical @ platform
     - specialized
       - On target efficiency with bedtools
@@ -94,7 +94,7 @@
     - read depth
     - strandedness problem[[file:org.org_imgs/20170224_132238_567aRU.png]]
   - Strandedness
-    - cite:Zhao_2015
+    - [cite:@Zhao_2015]
 
 ***** Validation
 :PROPERTIES:
@@ -102,8 +102,8 @@
 :END:
 - validation technologies
   - cannot distinguish isomiRs
-  - qPCR expected to correlate >.9 w/ seq expression > 2^8 cite:yeri2018
-  - qPCR more concordant than EdgeSeq or FirePlex cite:yeri2018
+  - qPCR expected to correlate >.9 w/ seq expression > 2^8 [cite:@yeri2018]
+  - qPCR more concordant than EdgeSeq or FirePlex [cite:@yeri2018]
 **** [[id:386d899a-9208-4d5c-93d8-3750b22d9748][RNA bench methods]]
 **** [[id:7BF989EC-4DA7-4B0C-AAA9-0175156447FF][RNA extraction, solubilization, and isolation]]
 **** [[id:4E23127E-4ED6-4802-A03C-4103AA8CAF29][RNA Quality and Quantification]]
@@ -115,7 +115,7 @@
     - RNA exome
     - pico
   - From input to library
-    - cite:van_Dijk_2014
+    - [cite:@van_Dijk_2014]
     - By workflow
       - Isolation
       - Enrichment
@@ -146,7 +146,7 @@
           - accounting for fragment bias- https://genomebiology.biomedcentral.com/articles/10.1186/gb-2011-12-3-r22
         - Sequencing adaptors
           - Y-adaptor PCR: blunt cDNA ends, add adenosine overhangs
-- cite:oneil2013
+- [cite:@oneil2013]
 - stranded
   - https://www.ecseq.com/support/ngs/how-do-strand-specific-sequencing-protocols-work
 **** [[id:3BC41E6A-00D3-4498-A48C-463F68CFD76B][Massively parallel sequencing]]
@@ -172,8 +172,8 @@
         - tophat fusion documentation http://ccb.jhu.edu/software/tophat/fusion_manual.html
       - STAR for chimeric reads / STAR-Fusion
         - [[https://github.com/STAR-Fusion/STAR-Fusion/wiki][website]]
-        - From cite:star_2.5_dobin Chapter 5
-        - From cite:dobin2015mapping Alternate Protocol 6
+        - From [cite:@star_2].5_dobin Chapter 5
+        - From [cite:@dobin2015mapping] Alternate Protocol 6
           - --chimSegmentMin <N> is minimum allowed length for each of the chimeric segments
         - additional outputs are
           - Chimeric.out.sam
@@ -225,19 +225,19 @@ by spike-in  Jiang,L., Schlesinger,F., Davis,C.A., Zhang,Y., Li,R., Salit,M., Gi
   - by spike-in  Jiang,L., Schlesinger,F., Davis,C.A., Zhang,Y., Li,R., Salit,M., Gingeras,T.R. and Oliver,B. (2011) Synthetic spike-in standards for RNA-seq experiments. Genome Res., 21, 1543–1551.
   - count-based
     - analysis only at the gene level
-      - cite:pachter2015
+      - [cite:@pachter2015]
     - edgeR
   - TPM
   - FPKM
   - https://europepmc.org/article/PMC/6058388
   - abundance
     - http://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html#introduction
-  - cite:pachter2015
+  - [cite:@pachter2015]
 - Bullard,J.H., Purdom,E., Hansen,K.D. and Dudoit,S. (2010) Evaluation of statistical methods for normalization and differential expression in mRNA-Seq experiments. BMC Bioinformatics, 11, doi:10.1186/1471-2105-11-94.
-- cite:peixoto2015
+- [cite:@peixoto2015]
 - https://www.the-scientist.com/news-opinion/technical-bias-widespread-in-rna-seq-datasets-66766?utm_campaign=TS_DAILY%20NEWSLETTER_2019&utm_source=hs_email&utm_medium=email&utm_content=79783848&_hsenc=p2ANqtz-_TvsXNNQSHgNWR9yE8Q6vZP04TRSx3T-W0rLk0NLucSkrSI0wQ0GDQ2L1Vs_Jf1x1_21ou8yVG1ur9nXtXbBYl91OsUg&_hsmi=79783848
 - normalization to control for systemic error / bias
-- shrinkage: pooling information across genes to obtain reliable variance estimates for small sample sizes, cite:pachter2015
+- shrinkage: pooling information across genes to obtain reliable variance estimates for small sample sizes, [cite:@pachter2015]
 - feature counting
   - HTSeq
   - featureCounts
@@ -382,7 +382,7 @@ https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-e
 - https://www.rna-seqblog.com/an-rna-seq-qc-overview/
 - https://www.biostars.org/p/368420/
 - https://bioinformatics.stackexchange.com/questions/3572/strange-per-sequence-gc-content-results
-- cite:wang2012
+- [cite:@wang2012]
 
 
 - samtools sort (to postion)
@@ -429,11 +429,11 @@ variabilize RNA seq workflow- make into function
 - A more fundamental problem, however, arises from the high dimensional-
 ity of the expression state. As the number of dimensions increases,
 traditional distance metrics, such as Euclidean distance, gradually
-lose their ability to distinguish the closest and most distant points18. cite:kharchenko2021
+lose their ability to distinguish the closest and most distant points18. [cite:@kharchenko2021]
 
 
 https://bookdown.org/rdpeng/exdata/k-means-clustering.html
-- cite:vidman2019
+- [cite:@vidman2019]
 Bergkvist,A., Rusnakova,V., Sindelka,R., Garda,J.M., Sjogreen,B.,
 Lindh,D., Forootan,A. and Kubista,M. (2010) Gene expression
 profiling–clusters of possibilities. Methods, 50, 323–335.
@@ -443,7 +443,7 @@ Kraja,A.T., Li,N., Nock,N.L., Parkhomenko,E., Rao,J.S. et al.
 phenotypes with genetic marker data. Genet. Epidemiol., 31(Suppl.
 1), S103–S109.
 
-- cite:buschmann2016 pg 6011
+- [cite:@buschmann2016] pg 6011
 - hierarchical clustering
   - eucledian
   - pearson
@@ -468,17 +468,17 @@ https://uc-r.github.io/hc_clustering
 https://www.biostars.org/p/287512/
 - https://www.datanovia.com/en/blog/types-of-clustering-methods-overview-and-quick-start-r-code/
 
-- cite:vidman2019
+- [cite:@vidman2019]
 **** Differential gene expression
 :PROPERTIES:
 :ID:       ee030cef-74d4-435d-8228-b85f0e6203db
 :END:
 https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2021/RNAseq/Markdowns/09_Linear_Models.html
 https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#design-matrices-with-and-without-intercept-term
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7873980/
+- Guide to creating design matrices for gene expression experiments with practical examples for factorial, additive, and interaction models [cite:@law2020].
 https://www.nature.com/articles/s42003-023-04791-5
 
-cite:buschmann2016
+[cite:@buschmann2016]
 "y. Even though comparisons of software
 performances on small RNA-Seq data are scarce, a num-
 ber of independent and extensive evaluations for mRNAs
@@ -503,9 +503,9 @@ smaller datasets, edgeR and especially the more conserva-
 tive DESeq (or DESeq2) are found to be the methods of
 choice. On"
 
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7873980/
+- Guide to creating design matrices for gene expression experiments with practical examples for factorial, additive, and interaction models [cite:@law2020].
 https://rnabio.org/module-03-expression/0003/06/01/DE_Pathway_Analysis/
-https://www.nature.com/articles/s41598-018-29077-3
+- Ranking genome-wide correlation measurements improves co-expression network construction from both microarray and RNA-seq data [cite:@liesecke2018].
 https://rnabio.org/module-03-expression/0003/05/01/Batch-Correction/
 https://compgenomr.github.io/book/clustering-grouping-samples-based-on-their-similarity.html
 - https://www.bioconductor.org/packages/devel/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html
@@ -517,7 +517,7 @@ https://www.nature.com/articles/s41598-020-74567-y#Abs1
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6954399/
 - Results reporting
   - Examples
-    - cite:ward2021 page 4
+    - [cite:@ward2021] page 4
 ***** Visualizations
 :PROPERTIES:
 :ID:       4b2840f1-f0b3-40dc-b763-f0d2988fe146
@@ -529,7 +529,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6954399/
 :PROPERTIES:
 :ID:       43f1772e-f8ce-4f6b-a4bd-d35d381b89c9
 :END:
-  - cite:spies2017
+  - [cite:@spies2017]
   - https://support.bioconductor.org/p/65676/#66860
   - https://www.biostars.org/p/138988/
   - https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#group-specific-condition-effects-individuals-nested-within-groups
@@ -540,7 +540,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6954399/
 :PROPERTIES:
 :ID:       4b9eee0d-4dd2-4b31-a5c2-873663443671
 :END:
-  - cite:mccarthy2012
+  - [cite:@mccarthy2012]
   - https://angus.readthedocs.io/en/2016/_static/DifferentialExpressionBasics_NGS2016_ID.pdf
 ***** specialized DE datasets
 :PROPERTIES:
@@ -549,7 +549,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6954399/
 - long non-coding- https://europepmc.org/article/PMC/6058388
 - transcript / isoform DE
   - https://davetang.org/muse/2017/10/25/getting-started-hisat-stringtie-ballgown/
-  - sleuth https://www.nature.com/articles/nmeth.4324 cite:pachter2015
+  - sleuth https://www.nature.com/articles/nmeth.4324 [cite:@pachter2015]
   - CuffDiff- isoform count-based
 ***** tutorials
 :PROPERTIES:
@@ -574,13 +574,13 @@ doi:10.2202/1544-6115.1637.
 
 
 
-  - cite:huang2015
+  - [cite:@huang2015]
   - https://angus.readthedocs.io/en/2016/_static/DifferentialExpressionBasics_NGS2016_ID.pdf
   - https://bioinformatics-core-shared-training.github.io/RNAseq-R/slides/LinearModels.pdf
   - dispersion
     - https://support.bioconductor.org/p/75260/
   - no t-test
-    - cite:jeanmougin2010
+    - [cite:@jeanmougin2010]
     - https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0012336
   - RNA expression varies about 10^5
   - RNA counts follow “overdispersed” poisson ( (large number of events, each event is rare) / negative binomial distribution (additional factor is dispersion)
@@ -608,11 +608,11 @@ doi:10.2202/1544-6115.1637.
   - SAMSeq
   - NOISeq
 - methods comparisons
-  - cite:fonseca2014
-  - cite:huang2015
-  - cite:seyednasrollah2015
-  - cite:tang2015
-  - cite:rapaport2013
+  - [cite:@fonseca2014]
+  - [cite:@huang2015]
+  - [cite:@seyednasrollah2015]
+  - [cite:@tang2015]
+  - [cite:@rapaport2013]
   - https://www.nature.com/articles/s41598-020-59516-z#data-availability
   - comparison
     - https://academic.oup.com/bib/article/16/1/59/240754#26957696
@@ -630,10 +630,10 @@ doi:10.2202/1544-6115.1637.
 :PROPERTIES:
 :ID:       558011C7-FB50-435E-B130-E3485CC25B90
 :END:
-- cite:anders2010
+- [cite:@anders2010]
 - https://pubmed.ncbi.nlm.nih.gov/22931062/
 - bench methods
-  - cite:parekh2016
+  - [cite:@parekh2016]
 
 
 **** [[id:91d46e60-eec3-48c7-97f1-b53eb1559b3f][Co-expression]]
@@ -663,21 +663,21 @@ doi:10.2202/1544-6115.1637.
 - [[cite:&hulstaert2020]]
 - [[cite:&exrnaqc2021]]
 - spike-in use
-  - cite:godoy2019
-  - cite:giraldez2018
+  - [cite:@godoy2019]
+  - [cite:@giraldez2018]
 
-- cite:godoy2018
-- cite:alexander2022
+- [cite:@godoy2018]
+- [cite:@alexander2022]
 - spike ins use
-  - cite:godoy2019
-  - cite:giraldez2018
+  - [cite:@godoy2019]
+  - [cite:@giraldez2018]
 - [[id:fd462ab0-6aaf-4732-953b-141ad5e2ee72][small RNA sequencing]]
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9358052/
 - https://www.biorxiv.org/content/10.1101/113050v1.full
-- cite:vorperian2022
-- https://www.sciencedirect.com/science/article/pii/S0092867419301679?via%3Dihub#sec4
+- [cite:@vorperian2022]
+- exRNA Atlas: comprehensive catalog of extracellular RNA cargo types and carriers across human biofluids (plasma, saliva, urine, CSF) with standardized processing pipelines [cite:@murillo2019].
 - https://www.sciencedirect.com/science/article/pii/S2211124720315412?via%3Dihub
-- cite:yeri2018
+- [cite:@yeri2018]
 
 
 ****** [[id:80cff175-c41d-42d4-aaa0-39546e0a6f1d][Plasma exRNA (cfRNA) extraction and isolation]]
@@ -704,7 +704,7 @@ doi:10.2202/1544-6115.1637.
 :PROPERTIES:
 :ID:       59ec7abc-dd76-4c09-b84a-75e1e08cfcd3
 :END:
-- cite:lee2016exrna
+- [cite:@lee2016exrna]
 ****** Complete pipelines
 :PROPERTIES:
 :ID:       71bf0765-1582-4d5e-b11e-64317d09dfed
@@ -721,25 +721,25 @@ doi:10.2202/1544-6115.1637.
 :PROPERTIES:
 :ID:       6e1ef9db-2ac5-4156-9eab-5e99a2875cdc
 :END:
-- cite:godoy2018
+- [cite:@godoy2018]
 ******* Plasma
 :PROPERTIES:
 :ID:       f4018b42-1681-415d-a96f-1ce8542b1b97
 :END:
 - non-human plasma small RNA
-  - cite:vliet2017
+  - [cite:@vliet2017]
 - human plasma small RNA
-  - cite:danielson2018
-  - cite:godoy2018
-  - cite:max2018
-  - cite:yeri2018
-  - cite:danielson2017
-  - cite:juzenas2017
-  - cite:yeri2017
-  - cite:freedman2016
+  - [cite:@danielson2018]
+  - [cite:@godoy2018]
+  - [cite:@max2018]
+  - [cite:@yeri2018]
+  - [cite:@danielson2017]
+  - [cite:@juzenas2017]
+  - [cite:@yeri2017]
+  - [cite:@freedman2016]
 - plasma transcriptome RNA
-  - cite:zhao2018
-  - cite:chen2019exrna
+  - [cite:@zhao2018]
+  - [cite:@chen2019exrna]
 ******* urine
 :PROPERTIES:
 :ID:       a454bd50-ba17-4fb1-bfc8-350826287b67
@@ -760,24 +760,24 @@ doi:10.2202/1544-6115.1637.
 - - cell of origin -
   - https://www.biorxiv.org/content/10.1101/2021.05.05.441859v1.full
   - https://www.nature.com/articles/s41587-021-01188-9
-- cite:alexander2022
+- [cite:@alexander2022]
 - pipelines- [[id:1db0ffb6-25b7-4c97-9aa0-263b8c96373b][exceRpt]]
 
 ***** small RNA sequencing
 :PROPERTIES:
 :ID:       fd462ab0-6aaf-4732-953b-141ad5e2ee72
 :END:
-- cite:giraldez2018
+- [cite:@giraldez2018]
 - https://link.springer.com/protocol/10.1007%2F978-1-4939-9042-9_4
-- cite:buschmann2016
+- [cite:@buschmann2016]
 ****** General reference
 :PROPERTIES:
 :ID:       65a85f59-afd5-4c6b-a785-9b6269cc7a51
 :END:
-- miRQC cite:mestdagh2014
-- cite:mehta2014
+- miRQC [cite:@mestdagh2014]
+- [cite:@mehta2014]
 - [[https://www.biostars.org/t/smallrna/?sort=votes&limit=all%20time][biostars small RNA]]
-- cite:korpelainen2015 chapter 12
+- [cite:@korpelainen2015] chapter 12
 - best practices
   - https://www.encodeproject.org/data-standards/rna-seq/small-rnas/
 
@@ -795,11 +795,11 @@ https://exrna.org/resources/data/data-quality-control-standards/
   - adapter trimming
   - quality filtering
   - read length trimming
-    - remove at less than 16 nt (see cite:buschmann2016 ref 157,158)
+    - remove at less than 16 nt (see [cite:@buschmann2016] ref 157,158)
     - these are adapter dimers and degraded RNA
 - QC
   - filtered reads should have miRNA 21-23 nt peak and piRNA 30-32 nt peak
-  - overrepresented sequence- k-mer distribution- see cite:buschmann2016 pg 6007
+  - overrepresented sequence- k-mer distribution- see [cite:@buschmann2016] pg 6007
 - [[id:1EE731A3-83DD-46AF-B988-2311307C335F][LINK TO Raw sequence QC and processing]]
 ****** [[id:51e5d70c-4a62-4960-880e-56f050194a0a][LINK TO Extracellular RNA biology]]
 :PROPERTIES:
@@ -814,8 +814,8 @@ https://exrna.org/resources/data/data-quality-control-standards/
   - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4538800/
 - validation technologies
   - cannot distinguish isomiRs
-  - qPCR expected to correlate >.9 w/ seq expression > 2^8 cite:yeri2018
-  - qPCR more concordant than EdgeSeq or FirePlex cite:yeri2018
+  - qPCR expected to correlate >.9 w/ seq expression > 2^8 [cite:@yeri2018]
+  - qPCR more concordant than EdgeSeq or FirePlex [cite:@yeri2018]
 - what depth? https://www.researchgate.net/post/how_many_million_reads_for_miRNA_discovery
 - reads per sample
   - https://www.qiagen.com/us/resources/faq?id=a119d5f0-0a2a-4612-828e-d8fa3cc37891&lang=en
@@ -831,23 +831,23 @@ https://exrna.org/resources/data/data-quality-control-standards/
 :PROPERTIES:
 :ID:       71289eeb-a929-44bd-a46e-a0c3dcd7a8f4
 :END:
-- cite:wong2019
-- cite:coenen-stass2018
-- cite:qiagen2019biofluid_mirna
-- Truseq small finds more tRNA fragments than other kits cite:yeri2018
-- Bioscientific NextFlex maps more reads to miRNA than other kits cite:yeri2018 (~75% vs 65% for truseq in plasma)
-- read diversity correlates to input volume, but b/w 550 and 650 at >1 RPM at volumes 200 uL to 5 mL cite:yeri2018 8c
+- [cite:@wong2019]
+- [cite:@coenen]-stass2018
+- [cite:@qiagen2019biofluid_mirna]
+- Truseq small finds more tRNA fragments than other kits [cite:@yeri2018]
+- Bioscientific NextFlex maps more reads to miRNA than other kits [cite:@yeri2018] (~75% vs 65% for truseq in plasma)
+- read diversity correlates to input volume, but b/w 550 and 650 at >1 RPM at volumes 200 uL to 5 mL [cite:@yeri2018] 8c
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6161688/
-- cite:buschmann2016
-- cite:illumina2016truseq_small
+- [cite:@buschmann2016]
+- [cite:@illumina2016truseq_small]
 - 10-50 ng isolated or 1 ug total https://support.illumina.com/content/dam/illumina-support/documents/documentation/chemistry_documentation/samplepreps_truseq/truseqsmallrna/truseq-small-rna-library-prep-kit-reference-guide-15004197-02.pdf
-- library prep - cite:wright2019
+- library prep - [cite:@wright2019]
 - https://dx.doi.org/10.1186%2Fs12864-018-4726-6
 - https://dx.doi.org/10.1186%2Fs12864-018-4491-6
-- small RNA library preparation cite:illumina2016
-- kit consistency required- see cite:yeri2018 8b
-- with low input, use same kit for reproducibility cite:yeri2018
-- cite:dard-dascot2018
+- small RNA library preparation [cite:@illumina2016]
+- kit consistency required- see [cite:@yeri2018] 8b
+- with low input, use same kit for reproducibility [cite:@yeri2018]
+- [cite:@dard]-dascot2018
 ****** [[id:3BC41E6A-00D3-4498-A48C-463F68CFD76B][LINK TO Massively parallel sequencing]]
 :PROPERTIES:
 :ID:       6584c294-78b9-42e5-a25b-28a069e112d8
@@ -857,7 +857,7 @@ https://exrna.org/resources/data/data-quality-control-standards/
 :ID:       f46e278c-dd38-4603-9fa2-a973823e1333
 :END:
 - alignment to miRbase needs to be more conservative to avoid mismatches
-- cite:buschmann2016
+- [cite:@buschmann2016]
 - https://link.springer.com/protocol/10.1007%2F978-1-4939-9042-9_4
 ******* Pre-processing
 :PROPERTIES:
@@ -867,11 +867,11 @@ https://exrna.org/resources/data/data-quality-control-standards/
   - adapter trimming
   - quality filtering
   - read length trimming
-    - remove at less than 16 nt (see cite:buschmann2016 ref 157,158)
+    - remove at less than 16 nt (see [cite:@buschmann2016] ref 157,158)
     - these are adapter dimers and degraded RNA
 - QC
   - filtered reads should have miRNA 21-23 nt peak and piRNA 30-32 nt peak
-  - overrepresented sequence- k-mer distribution- see cite:buschmann2016 pg 6007
+  - overrepresented sequence- k-mer distribution- see [cite:@buschmann2016] pg 6007
 - [[id:1EE731A3-83DD-46AF-B988-2311307C335F][LINK TO Raw sequence QC and processing]]
 ******* Alignment
 :PROPERTIES:
@@ -891,7 +891,7 @@ https://exrna.org/resources/data/data-quality-control-standards/
 :PROPERTIES:
 :ID:       56d53b46-2a62-4777-b5c7-eedbc306d4b4
 :END:
-cite:buschmann2016
+[cite:@buschmann2016]
 "y. Even though comparisons of software
 performances on small RNA-Seq data are scarce, a num-
 ber of independent and extensive evaluations for mRNAs
@@ -919,23 +919,23 @@ choice. On"
 :PROPERTIES:
 :ID:       e597d527-5538-4f69-bd28-a24a70969317
 :END:
-cite:buschmann2016 pg6011
+[cite:@buschmann2016] pg6011
 ******* Integrated tools
 :PROPERTIES:
 :ID:       07055c47-6e24-4f59-bce4-0ab91a7f5377
 :END:
 - miRDeep2 / miRDeep
-  - cite:friedlander2012
+  - [cite:@friedlander2012]
 - exceRpt / genboree
   - http://github.gersteinlab.org/exceRpt/
   - using
-    - cite:godoy2018
-    - cite:freedman2016
+    - [cite:@godoy2018]
+    - [cite:@freedman2016]
   - http://genboree.org/java-bin/workbench.jsp
 - miRge / miRge2 WOS 29 times cited
   - https://mirge3.readthedocs.io/en/latest/quick_start.html
   - https://github.com/mhalushka/miRge3.0
-  - cite:lu2018mirge
+  - [cite:@lu2018mirge]
   - https://github.com/mhalushka/miRge
     - https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-018-2287-y
 - sRNAbench
@@ -953,8 +953,8 @@ cite:buschmann2016 pg6011
 :ID:       cbf67ef7-39ec-45ec-b599-cdc0e8590cf7
 :END:
 - spike ins use
-  - cite:godoy2019
-  - cite:giraldez2018
+  - [cite:@godoy2019]
+  - [cite:@giraldez2018]
 - pipelines- [[id:1db0ffb6-25b7-4c97-9aa0-263b8c96373b][exceRpt]]
 ******** [[id:71289eeb-a929-44bd-a46e-a0c3dcd7a8f4][small RNA library preparation]]
 :PROPERTIES:
@@ -973,25 +973,25 @@ cite:buschmann2016 pg6011
 :PROPERTIES:
 :ID:       a5bfc41c-ebcb-4f31-bf8c-3099e5ad170b
 :END:
-- cite:godoy2018
+- [cite:@godoy2018]
 ********* Plasma
 :PROPERTIES:
 :ID:       c3ec22fa-fd6b-4c74-b4c6-71aa346819c2
 :END:
 - non-human plasma small RNA
-  - cite:vliet2017
+  - [cite:@vliet2017]
 - human plasma small RNA
-  - cite:danielson2018
-  - cite:godoy2018
-  - cite:max2018
-  - cite:yeri2018
-  - cite:danielson2017
-  - cite:juzenas2017
-  - cite:yeri2017
-  - cite:freedman2016
+  - [cite:@danielson2018]
+  - [cite:@godoy2018]
+  - [cite:@max2018]
+  - [cite:@yeri2018]
+  - [cite:@danielson2017]
+  - [cite:@juzenas2017]
+  - [cite:@yeri2017]
+  - [cite:@freedman2016]
 - plasma transcriptome RNA
-  - cite:zhao2018
-  - cite:chen2019exrna
+  - [cite:@zhao2018]
+  - [cite:@chen2019exrna]
 ********* urine
 :PROPERTIES:
 :ID:       554d0ae8-d299-4d9e-83fa-26398f75db43
@@ -1014,7 +1014,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
   - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4538800/
 - reads per sample
   - https://www.qiagen.com/us/resources/faq?id=a119d5f0-0a2a-4612-828e-d8fa3cc37891&lang=en
-- cite:tam2015
+- [cite:@tam2015]
 - https://www.nature.com/articles/srep05150#Sec11
 - http://www.mircode.org/faq.php
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4652620/
@@ -1022,8 +1022,8 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
 - [[id:5d9593fd-f083-450f-a510-449aa15ae670][LINK TO miRNA biology]]
 - [[id:95b3c7f3-3b84-45b1-b8bf-5e2e6e2a6f88][LINK TO miRNA data]]
 - spike-ins
-  - cite:qiagen2018mirnaspike cite:exiqon2016exiseq
-  - cite:locati2015
+  - [cite:@qiagen2018mirnaspike] [cite:@exiqon2016exiseq]
+  - [cite:@locati2015]
   - https://genome.cshlp.org/content/21/9/1543.long
 - processes
   - preprocessing
@@ -1041,34 +1041,22 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
     - http://ophid.utoronto.ca/mirDIP/
   - [[id:82aafb6f-63a8-4ab7-867a-9add0e0c224a][LINK TO Integrated miRNA-mRNA analysis]]
 - tools
-  - manatee cite:handzlik2020
+  - manatee [cite:@handzlik2020]
   - tool comparisons
     - https://www.frontiersin.org/articles/10.3389/fgene.2018.00022/full
-    - cite:chen2019mirna
+    - [cite:@chen2019mirna]
 - general reference
-  - cite:pritchard2012
+  - [cite:@pritchard2012]
     - citing, times cited WOS:
-      - cite:braunwald2013
-      - cite:dong2013
-      - cite:schwarzenbach2014
+      - [cite:@braunwald2013]
+      - [cite:@dong2013]
+      - [cite:@schwarzenbach2014]
       - " Whereas high-speed centrifugation (14,000–16,000 g) can remove living cells and cell debris, separating exosomes and small shedding vesicles requires ultracentrifugation (>110,000 g).30 Blood cell count has a significant effect on miRNA expression levels in plasma;31 therefore, samples from patients with an inflammatory process, who should have high white blood cell count, should be excluded from analysis. Haemolysis is also known to markedly influence miRNA expression patterns, because of a contamination of abundant intracellular miRNAs.31"
   - [[http://apps.pathology.jhu.edu/mirnaprogram/links/http://apps.pathology.jhu.edu/mirnaprogram/links/][Johns Hopkins microRNA Bio lab]]
   - https://www.biostars.org/t/mirna/
 - protocols
-  - cite:fu2018mirna
+  - [cite:@fu2018mirna]
   - https://www.sciencedirect.com/science/article/pii/S266591312030131X#sec3
-****** General reference
-:PROPERTIES:
-:ID:       65a85f59-afd5-4c6b-a785-9b6269cc7a51
-:END:
-- miRQC cite:mestdagh2014
-- cite:mehta2014
-- [[https://www.biostars.org/t/smallrna/?sort=votes&limit=all%20time][biostars small RNA]]
-- cite:korpelainen2015 chapter 12
-- best practices
-  - https://www.encodeproject.org/data-standards/rna-seq/small-rnas/
-
-
 ****** Integrated miRNA-mRNA analysis
 :PROPERTIES:
 :ID:       82aafb6f-63a8-4ab7-867a-9add0e0c224a
@@ -1077,7 +1065,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
 - example papers
   - https://bmccancer.biomedcentral.com/articles/10.1186/s12885-019-5983-8#Sec2
   - https://www.oncotarget.com/article/8713/text/
-  - cite:li2017mirna
+  - [cite:@li2017mirna]
 **** Methods by tissue source or isolation
 :PROPERTIES:
 :ID:       4d4a89d1-e039-4a89-b968-81c80f38d884
@@ -1100,27 +1088,27 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
 :ID:       8eaeeb06-f610-4d9d-80e1-06c148a85646
 :END:
 - non-human plasma small RNA
-  - cite:vliet2017
+  - [cite:@vliet2017]
 - human plasma small RNA
-  - cite:danielson2018
-  - cite:godoy2018
-  - cite:max2018
-  - cite:yeri2018
-  - cite:danielson2017
-  - cite:juzenas2017
-  - cite:yeri2017
-  - cite:freedman2016
+  - [cite:@danielson2018]
+  - [cite:@godoy2018]
+  - [cite:@max2018]
+  - [cite:@yeri2018]
+  - [cite:@danielson2017]
+  - [cite:@juzenas2017]
+  - [cite:@yeri2017]
+  - [cite:@freedman2016]
 - plasma transcriptome RNA
-  - cite:zhao2018
-  - cite:chen2019exrna
+  - [cite:@zhao2018]
+  - [cite:@chen2019exrna]
 
 ***** ffpe
 :PROPERTIES:
 :ID:       632e82ae-a39d-4953-a642-85445ca8a7f6
 :END:
-  - cite:kashofer2013
+  - [cite:@kashofer2013]
   - FFPE Pre-analytic variability
-    - cite:ahlfen2007rnaqual
+    - [cite:@ahlfen2007rnaqual]
       - storage conditions
       - cold ischemia time
       - fixation
@@ -1128,27 +1116,27 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
         - time
       - sample thickness
     - biospecimens.cancer.gov/researchnetwork
-    - cite:unlockingQiagen
+    - [cite:@unlockingQiagen]
     - https://www.ncbi.nlm.nih.gov/pubmed/25357115
     - By effect
       - Yield
         - - prolonged fix reduces yield- Bresters D, Schipper ME, Reesink HW, Boeser-Nunnink BD, Cuypers HT. The duration of fixation influences the yield of HCV cDNA-PCR products from formalin-fixed, paraffin- embedded liver tissue. J Virol Methods 1994;48:267–72.
-        - cite:webster2015mining longer fixation times decrease RNA yields from paraffin-embedded tissues (herein 3 weeks in formalin resulted in half the RNA yield/sec- tion compared with 18 h) and increase RNA input needed during library preparation (see methods). This latter effect is likely due to ‘non-functional’ RNA (eg, adducts or damaged bases) that could be potentially mitigated by treatments like PreCR or other enzymatic and chemical methods.
+        - [cite:@webster2015mining] longer fixation times decrease RNA yields from paraffin-embedded tissues (herein 3 weeks in formalin resulted in half the RNA yield/sec- tion compared with 18 h) and increase RNA input needed during library preparation (see methods). This latter effect is likely due to ‘non-functional’ RNA (eg, adducts or damaged bases) that could be potentially mitigated by treatments like PreCR or other enzymatic and chemical methods.
       - At microarray expression
-        - cite:kashofer2013quality
+        - [cite:@kashofer2013quality]
     - "Formalin fixation introduced major changes into microarray gene expression data and led to marked gene-to-gene variations in delta-ct values of qRT-PCR. We found that qRT-PCR efficiency and gene-to- gene variations were mainly attributed to differences in the efficiency of cDNA synthesis as the most sensitive step. These differences could not be reliably detected by quality assessment of total RNA isolated from formalin-fixed tissues by electrophoresis or spectrophotometry. "
     - At sequencing
-  - cite:graw2015
+  - [cite:@graw2015]
   - Past expression tech
     - goals were biomarker discovery and patient stratification
-    - cite:Zhao_2014 manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
-    - cite:webster2015mining When compared with conventional DNA microarrays, RNA-seq enriches for many additional fragments as it is not restricted to predefined probes and has (in principle) no limitations to dynamic range (Li et al., 2014b; SEQC/MAQC-III Consortium, 2014).
+    - [cite:@Zhao_2014] manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
+    - [cite:@webster2015mining] When compared with conventional DNA microarrays, RNA-seq enriches for many additional fragments as it is not restricted to predefined probes and has (in principle) no limitations to dynamic range (Li et al., 2014b; SEQC/MAQC-III Consortium, 2014).
     - - https://www.ncbi.nlm.nih.gov/pubmed/14695316
     - - [[https://www.ncbi.nlm.nih.gov/pubmed/15509548][DASL]]
     - https://www.ncbi.nlm.nih.gov/pubmed/21347257
   - FFPE microarray and RT-PCR was useful
     - AlloMap is a non-invasive gene expression-based blood test that is used to manage the clinical care of heart transplant recipients, providing a quantified score for the risk of rejection based on the measurement of expression of 20 genes, a subset of which are related to immune system activation and signalling15,16.
-    - - cite:penland2007rna
+    - - [cite:@penland2007rna]
     - - - https://www.ncbi.nlm.nih.gov/pubmed/11568892/
     - Mittempergher, L., de Ronde, J.J., Nieuwland, M., Kerkhoven, R.M., Simon, I., Th Rutgers, E.J., Wessels, L.F., Van't Veer, L.J., 2011. Gene expression profiles from formalin fixed paraffin embedded breast cancer tissue are largely comparable to fresh fro- zen matched tissue. PLoS One 6, e17163.
   - But this expression tech is inferior
@@ -1166,7 +1154,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
     - semiquan
     - no SNV discovery
     - no fusion
-    - "RNA-seq provides much more detailed information on specific transcript expression patterns in clinico-genetic neuroblastoma subgroups than microarrays. " cite:zhang2015comparison
+    - "RNA-seq provides much more detailed information on specific transcript expression patterns in clinico-genetic neuroblastoma subgroups than microarrays. " [cite:@zhang2015comparison]
 **** General
 :PROPERTIES:
 :ID:       34f17ca7-009c-4110-b6a9-6bfbf7c8a612
@@ -1176,7 +1164,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
   - [[id:e7a8362d-f4cf-45ec-a3f8-91b0ffbdc500][ffpe rna-seq project]]
   - [[file:~/data/career/pathology/molecular-pathology/ffpe-rna/ffpe-rnaseq.org]]
 - [[https://www.nature.com/subjects/rna-sequencing/nmeth][Nature Methods RNA sequencing]]
-- tool comparisons cite:sahraeian2017
+- tool comparisons [cite:@sahraeian2017]
 - data
   - public RNA sequencing data
     - [[https://webshare.bioinf.unc.edu/public/mRNAseq_TCGA/UNC_mRNAseq_summary.pdf][TCGA RSEM]]
@@ -1187,10 +1175,10 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
       - https://support.bioconductor.org/p/65890/
   - see [[http://www.cbil.upenn.edu/BEERS/][BEERS]] for generating fake RNA seq data
 
-- cite:korpelainen2015
+- [cite:@korpelainen2015]
   - [[http://rnaseq-book.blogspot.fi/][Korpelainen,15 web companion]]
 - [[http://rnaseq.uoregon.edu/][RNAcyclopedia]]
-- comparisons cite:poplawski2015
+- comparisons [cite:@poplawski2015]
 - [[https://hub.docker.com/r/mgibio/rnaseq/dockerfile][mgi rna-seq dockerfile]]
 **** Nacent RNA sequencing
 :PROPERTIES:
@@ -1201,7 +1189,7 @@ CLOCK: [2022-06-06 Mon 10:45]--[2022-06-06 Mon 11:25] =>  0:40
 CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
 :END:
 - https://www.scopus.com/results/results.uri?sort=plf-f&src=s&st1=%22precision+run-on+sequencing%22+OR+%22PRO-seq%22&sid=eeff59adf884bc66d7f41fb65fee374c&sot=b&sdt=b&sl=57&s=TITLE-ABS-KEY%28%22precision+run-on+sequencing%22+OR+%22PRO-seq%22%29&origin=searchbasic&editSaveSearch=&yearFrom=Before+1960&yearTo=Present
-  - cite:mahat2016
+  - [cite:@mahat2016]
     - https://www.scopus.com/results/citedbyresults.uri?sort=cp-f&cite=2-s2.0-84979882531&src=s&nlo=&nlr=&nls=&imp=t&sid=83fb718ed42783d656150cb229690a68&sot=cite&sdt=a&sl=0&origin=resultslist&offset=1&txGid=80fce121791a099b206e9017b82f705f&isValidNewDocSearchRedirection=false
       - https://www.nature.com/articles/nature20149
       - https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1870-5
@@ -1209,13 +1197,13 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
   - https://www.nature.com/articles/nprot.2016.086
 - https://genome.cshlp.org/content/27/11/1816
 - https://www.scopus.com/results/results.uri?cc=10&sort=cp-f&src=s&st1=%22nascent+RNA+sequencing%22&nlo=&nlr=&nls=&sid=a567d38581c262627b32ded722d56613&sot=b&sdt=b&sl=39&s=TITLE-ABS-KEY%28%22nascent+RNA+sequencing%22%29&ss=cp-f&ps=r-f&editSaveSearch=&origin=resultslist&zone=resultslist
-  - cite:core2008
-  - cite:henriques2018
+  - [cite:@core2008]
+  - [cite:@henriques2018]
 **** Integrating results across RNA-seq datasets
 :PROPERTIES:
 :ID:       6f5a8723-50ba-463d-86c4-a322aa7058bb
 :END:
-- cite:rajkumar2015
+- [cite:@rajkumar2015]
 - https://www.nature.com/articles/s42003-023-04791-5
 **** Writeup
 :PROPERTIES:
@@ -1253,41 +1241,12 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
 :CREATED:  [2020-08-05 Wed 08:36]
 :ID:       1a1d5b73-8070-402a-9f26-e147d66ca081
 :END:
-****** CIBERSORTx
-:PROPERTIES:
-:ID:       bb55c105-5977-4a01-802e-4bc1838f58bb
-:END:
-
-https://www.biostars.org/p/428905/
-    - raw counts will be converted to CPM in cibersortx- see https://cibersortx.stanford.edu/tutorial.php
-- cibersortx
-  - cite:newman2015
-  - [[mu4e:msgid:BYAPR02MB5592ACF7A79C1137A6F0A974B77B0@BYAPR02MB5592.namprd02.prod.outlook.com][Re: cibersortx from docker]]
-  - docker pull lyronctk/cibersortxfractions
-- have access token for docker: https://cibersortx.stanford.edu/getoken.php
-***** cell enumeration through bulk RNA-seq
-:PROPERTIES:
-:CREATED:  [2020-08-05 Wed 08:36]
-:ID:       1a1d5b73-8070-402a-9f26-e147d66ca081
-:END:
-****** CIBERSORTx
-:PROPERTIES:
-:ID:       bb55c105-5977-4a01-802e-4bc1838f58bb
-:END:
-
-https://www.biostars.org/p/428905/
-    - raw counts will be converted to CPM in cibersortx- see https://cibersortx.stanford.edu/tutorial.php
-- cibersortx
-  - cite:newman2015
-  - [[mu4e:msgid:BYAPR02MB5592ACF7A79C1137A6F0A974B77B0@BYAPR02MB5592.namprd02.prod.outlook.com][Re: cibersortx from docker]]
-  - docker pull lyronctk/cibersortxfractions
-- have access token for docker: https://cibersortx.stanford.edu/getoken.php
 *** Microarray
 :PROPERTIES:
 :ID:       294edcbb-f306-4f94-9eba-e8a1c7c512f1
 :END:
-- cite:lee2004
-- cite:nguyen2002
+- [cite:@lee2004]
+- [cite:@nguyen2002]
 *** Allele-specific expression
 :PROPERTIES:
 :ID:       ed7d8d19-8da3-4c51-b082-730d1cf1d3ec
@@ -1307,11 +1266,11 @@ https://www.biostars.org/p/428905/
   - tools
     - ISOpure
       - https://link.springer.com/article/10.1186/s12859-015-0597-x#Sec1
-  - cite:newman2015
+  - [cite:@newman2015]
 - Clinical applications of RNA-seq
-  - cite:byron2016translating
-  - cite:Kalari_2014
-  - cite:Van_Keuren_Jensen_2014
+  - [cite:@byron2016translating]
+  - [cite:@Kalari_2014]
+  - [cite:@Van_Keuren_Jensen_2014]
 ******* eQTL (expression quantitative trait loci) mapping
 :PROPERTIES:
 :ID:       2CA85A6B-7B1E-4A38-96AA-717847A59168
@@ -1339,8 +1298,8 @@ https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
     - https://mail.google.com/mail/u/0/#inbox/FMfcgxwLtGthWWRrdltpWVLTXhQKnZDs https://support.10xgenomics.com/spatial-gene-expression/sequencing/doc/specifications-sequencing-requirements-for-visium-spatial-gene-expression
   - GeoMx
     - https://www.scopus.com/results/results.uri?sort=plf-f&src=s&st1=geomx&sid=cceac18bcbdba4f776ce2a6635ba19bc&sot=b&sdt=b&sl=20&s=TITLE-ABS-KEY%28geomx%29&origin=searchbasic&editSaveSearch=&yearFrom=Before+1960&yearTo=Present
-      - Only covers protein- cite:van2019
-      - cite:nielsen2020
+      - Only covers protein- [cite:@van2019]
+      - [cite:@nielsen2020]
     - https://mail.google.com/mail/u/0/#inbox/FMfcgzGmvffBFCTQTwfXgXkvZNcgdlrN
   - Ish https://science.sciencemag.org/content/360/6389/660
 - Reference
@@ -1387,12 +1346,12 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9371296/
 https://www.reddit.com/r/bioinformatics/comments/1b37wuh/optimize_gsea_analyses/
 https://uclouvain-cbio.github.io/WSBIM2122/sec-gsea.html
 [[https://www.reddit.com/r/bioinformatics/comments/13vk8r5/comparing_gsea_results_between_different_species/][clusterprofiler term to gene]]
-- cite:reimand2019
+- [cite:@reimand2019]
 - https://old.reddit.com/r/bioinformatics/comments/r7hzoq/annual_ingenuity_subscription_sticker_shock_and/
 - https://www.sciencedirect.com/science/article/pii/S2666166721004755
 - https://hbctraining.github.io/Training-modules/DGE-functional-analysis/lessons/02_functional_analysis.html
 
-- cite:sanchez-vega2018
+- [cite:@sanchez]-vega2018
 https://www.sciencedirect.com/science/article/pii/S2666166721004755
 https://www.reddit.com/r/bioinformatics/comments/tu61pw/doubt_over_pathway_analysis_approach/
 https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
@@ -1412,7 +1371,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:9b222d1c-ab61-450c-8b77-a98ec3213867][gage]]
   - https://genviz.org/module-04-expression/0004/03/01/pathwayAnalysis/
 - Aggregate - clusterProfiler
-  - cite:yu2012
+  - [cite:@yu2012]
   - http://bioconductor.org/packages/release/bioc/html/clusterProfiler.html
 - iPANDA https://www.nature.com/articles/ncomms13427#Sec10
 ***** Over-representation / hypergeometric test
@@ -1423,7 +1382,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - https://maayanlab.cloud/Enrichr/
 - Fisher exact
   - https://maayanlab.cloud/Enrichr/
-- Proposed in cite:boyle2004
+- Proposed in [cite:@boyle2004]
 ***** [[id:D68E1182-1F7B-4160-A6DD-BD2635F8085F][GSEA]] (Gene set enrichment)
 :PROPERTIES:
 :ID:       b2ca2c6c-d7f0-41a6-88aa-ec51bc77afa8
@@ -1435,7 +1394,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - cite:vanDam2018
+    - [cite:@vanDam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
@@ -1523,7 +1482,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 :PROPERTIES:
 :ID:       1139b0a7-32a3-4ccf-8bf2-0266f5e9b2e5
 :END:
-- cite:sanchez-vega2018
+- [cite:@sanchez]-vega2018
 **** Gene regulatory network inference
 :PROPERTIES:
 :ID:       b27fe952-97b2-447b-b97d-08f38d68be87
@@ -1558,27 +1517,27 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 :ID:       1ff81f54-552c-40f6-bc19-10aefecd034f
 :END:
 - https://bioinformaticsbreakdown.com/how-to-gsea/
-- Nature Protocol: cite:reimand2019
+- Nature Protocol: [cite:@reimand2019]
 - tutorial: https://girke.bioinformatics.ucr.edu/GEN242/tutorials/rfea/rfea/
 **** General reference
 :PROPERTIES:
 :ID:       98048a64-6bd5-4107-ab7e-573b57758f12
 :END:
-- cite:maleki2020
+- [cite:@maleki2020]
 - [[id:2CA85A6B-7B1E-4A38-96AA-717847A59168][QTL mapping]]
-- tutorial on transcriptional regulatory networks from total RNA-seq cite:chouvarine2021
-- cite:vandam2018
+- tutorial on transcriptional regulatory networks from total RNA-seq [cite:@chouvarine2021]
+- [cite:@vandam2018]
 - https://yulab-smu.top/biomedical-knowledge-mining-book/enrichment-overview.html
 - pathway annotation and conservation
   - https://academic.oup.com/nar/article/48/D1/D479/5626534#190997651
 - method and tool comparisons
-  - cite:amadoz2019
+  - [cite:@amadoz2019]
 - https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1790-4
-- cite:reimand2019
+- [cite:@reimand2019]
 - https://link.springer.com/article/10.1186/s40246-019-0226-2
 - https://www.sciencedirect.com/science/article/pii/S0022519314001969?via%3Dihub
-- cite:creixell2015
-- cite:rahmatallah2016
+- [cite:@creixell2015]
+- [cite:@rahmatallah2016]
 
 **** Methods and associated tools
 :PROPERTIES:
@@ -1603,7 +1562,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
     - - https://www.nature.com/articles/s41596-018-0103-9.pdf?proof=true19
     - https://bioconductor.org/packages/release/bioc/vignettes/ReactomePA/inst/doc/ReactomePA.html
   - [[id:9b222d1c-ab61-450c-8b77-a98ec3213867][gage]]
-  - cite:rahmatallah2014
+  - [cite:@rahmatallah2014]
   - https://academic.oup.com/bioinformatics/article/33/3/414/2875813
   - [[id:D68E1182-1F7B-4160-A6DD-BD2635F8085F][GSEA]]
 - Fisher exact
@@ -1611,7 +1570,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - cite:vanDam2018
+    - [cite:@vanDam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
@@ -1681,21 +1640,6 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
   #
   lnames
     #+end_src
-**** General reference
-:PROPERTIES:
-:ID:       98048a64-6bd5-4107-ab7e-573b57758f12
-:END:
-- https://yulab-smu.top/biomedical-knowledge-mining-book/enrichment-overview.html
-- pathway annotation and conservation
-  - https://academic.oup.com/nar/article/48/D1/D479/5626534#190997651
-- method and tool comparisons
-  - cite:amadoz2019
-- https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1790-4
-- cite:reimand2019
-- https://link.springer.com/article/10.1186/s40246-019-0226-2
-- https://www.sciencedirect.com/science/article/pii/S0022519314001969?via%3Dihub
-- cite:creixell2015
-- cite:rahmatallah2016
 *** Gene expression dynamics
 :PROPERTIES:
 :ID:       86071a18-2c82-4ca0-93a5-ef6f2dd9f0a4
@@ -1705,7 +1649,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 :PROPERTIES:
 :ID:       43f1772e-f8ce-4f6b-a4bd-d35d381b89c9
 :END:
-  - cite:spies2017
+  - [cite:@spies2017]
   - https://support.bioconductor.org/p/65676/#66860
   - https://www.biostars.org/p/138988/
   - https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#group-specific-condition-effects-individuals-nested-within-groups
@@ -2193,7 +2137,7 @@ CLOSED: [2022-10-26 Wed 13:48]
   - [[id:e7a8362d-f4cf-45ec-a3f8-91b0ffbdc500][ffpe rna-seq project]]
   - [[file:~/data/career/pathology/molecular-pathology/ffpe-rna/ffpe-rnaseq.org]]
 - [[https://www.nature.com/subjects/rna-sequencing/nmeth][Nature Methods RNA sequencing]]
-- tool comparisons cite:sahraeian2017
+- tool comparisons [cite:@sahraeian2017]
 - data
   - public RNA sequencing data
     - [[https://webshare.bioinf.unc.edu/public/mRNAseq_TCGA/UNC_mRNAseq_summary.pdf][TCGA RSEM]]
@@ -2203,7 +2147,7 @@ CLOSED: [2022-10-26 Wed 13:48]
       - http://seqanswers.com/forums/showthread.php?t=42911
       - https://support.bioconductor.org/p/65890/
   - see [[http://www.cbil.upenn.edu/BEERS/][BEERS]] for generating fake RNA seq data
-- cite:korpelainen2015
+- [cite:@korpelainen2015]
   - [[http://rnaseq-book.blogspot.fi/][Korpelainen,15 web companion]]
 - [[http://rnaseq.uoregon.edu/][RNAcyclopedia]]
 - https://en.wikipedia.org/wiki/List_of_RNA-Seq_bioinformatics_tools

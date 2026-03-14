@@ -5,6 +5,7 @@ channels:
 dependencies:
   - fastp
   - fastqc
+  - gffread
   - multiqc
   - salmon
   - samtools

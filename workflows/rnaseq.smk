@@ -95,13 +95,29 @@ rule rnaseq_star_index:
         echo "[STAR index] $(date) ref={wildcards.ref_name} threads={threads}"
 
         mkdir -p "{params.genome_dir}"
+        tmpdir=$(mktemp -d)
+
+        # Decompress if gzipped
+        if file -b "{input.fasta}" | grep -qi gzip; then
+            zcat "{input.fasta}" > "$tmpdir/genome.fa"
+        else
+            cp "{input.fasta}" "$tmpdir/genome.fa"
+        fi
+
+        if file -b "{input.gtf}" | grep -qi gzip; then
+            zcat "{input.gtf}" > "$tmpdir/genes.gtf"
+        else
+            cp "{input.gtf}" "$tmpdir/genes.gtf"
+        fi
 
         STAR --runMode genomeGenerate \
           --genomeDir "{params.genome_dir}" \
-          --genomeFastaFiles "{input.fasta}" \
-          --sjdbGTFfile "{input.gtf}" \
+          --genomeFastaFiles "$tmpdir/genome.fa" \
+          --sjdbGTFfile "$tmpdir/genes.gtf" \
           --genomeSAindexNbases {params.sa_index_bases} \
           --runThreadN {threads}
+
+        rm -rf "$tmpdir"
         """
 
 rule rnaseq_star_align:
@@ -190,14 +206,27 @@ rule rnaseq_salmon_index:
 
         tmpdir=$(mktemp -d)
 
+        # Decompress inputs if gzipped
+        if file -b "{input.fasta}" | grep -qi gzip; then
+            zcat "{input.fasta}" > "$tmpdir/genome.fa"
+        else
+            cp "{input.fasta}" "$tmpdir/genome.fa"
+        fi
+
+        if file -b "{input.gtf}" | grep -qi gzip; then
+            zcat "{input.gtf}" > "$tmpdir/genes.gtf"
+        else
+            cp "{input.gtf}" "$tmpdir/genes.gtf"
+        fi
+
         # Extract transcriptome from GTF + genome FASTA using gffread
         # For gentrome: concatenate transcriptome + genome, use genome as decoy
-        grep "^>" <(zcat "{input.fasta}" 2>/dev/null || cat "{input.fasta}") \
+        grep "^>" "$tmpdir/genome.fa" \
           | cut -d " " -f 1 | sed 's/>//' > "$tmpdir/decoys.txt"
 
         # Build gentrome (transcripts + genome)
-        gffread -w "$tmpdir/transcripts.fa" -g "{input.fasta}" "{input.gtf}"
-        cat "$tmpdir/transcripts.fa" <(zcat "{input.fasta}" 2>/dev/null || cat "{input.fasta}") \
+        gffread -w "$tmpdir/transcripts.fa" -g "$tmpdir/genome.fa" "$tmpdir/genes.gtf"
+        cat "$tmpdir/transcripts.fa" "$tmpdir/genome.fa" \
           > "$tmpdir/gentrome.fa"
 
         salmon index \
