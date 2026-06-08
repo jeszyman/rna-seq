@@ -86,7 +86,7 @@
     - low @ low counts b/c Poisson
     - low @ high counts b/c?
   - biological
-    - transcript abundence 10^5-10^7 see [cite:@Griffith_2015] refs 85,86
+    - transcript abundence 10^5-10^7 see [cite:@griffith2015] refs 85,86
   - technical @ platform
     - specialized
       - On target efficiency with bedtools
@@ -94,7 +94,7 @@
     - read depth
     - strandedness problem[[file:org.org_imgs/20170224_132238_567aRU.png]]
   - Strandedness
-    - [cite:@Zhao_2015]
+    - [cite:@zhao2015]
 
 ***** Validation
 :PROPERTIES:
@@ -115,7 +115,7 @@
     - RNA exome
     - pico
   - From input to library
-    - [cite:@van_Dijk_2014]
+    - [cite:@vandijk2014]
     - By workflow
       - Isolation
       - Enrichment
@@ -659,9 +659,9 @@ doi:10.2202/1544-6115.1637.
 :PROPERTIES:
 :ID:       d1b1f9a2-b228-461f-8553-15adf8426d28
 :END:
-- [[cite:&hulstaert2021]]
-- [[cite:&hulstaert2020]]
-- [[cite:&exrnaqc2021]]
+- [cite:@hulstaert2021]
+- [cite:@hulstaert2020]
+- [cite:@exrnaqc2021]
 - spike-in use
   - [cite:@godoy2019]
   - [cite:@giraldez2018]
@@ -711,7 +711,7 @@ doi:10.2202/1544-6115.1637.
 :END:
 - https://exrna.org/resources/software/
 - pipelines- [[id:1db0ffb6-25b7-4c97-9aa0-263b8c96373b][exceRpt]]
-- https://github.com/oncornalab/rnaexome from [[cite:&hulstaert2021]]
+- https://github.com/oncornalab/rnaexome from [cite:@hulstaert2021]
 ****** By transcript and sequencing
 :PROPERTIES:
 :ID:       f8d7339e-5a7f-4b95-bcf3-b1bf266ae588
@@ -1022,7 +1022,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
 - [[id:5d9593fd-f083-450f-a510-449aa15ae670][LINK TO miRNA biology]]
 - [[id:95b3c7f3-3b84-45b1-b8bf-5e2e6e2a6f88][LINK TO miRNA data]]
 - spike-ins
-  - [cite:@qiagen2018mirnaspike] [cite:@exiqon2016exiseq]
+  - [cite:@qiagen2018miRNAspike] [cite:@exiqon2016exiseq]
   - [cite:@locati2015]
   - https://genome.cshlp.org/content/21/9/1543.long
 - processes
@@ -1129,7 +1129,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
   - [cite:@graw2015]
   - Past expression tech
     - goals were biomarker discovery and patient stratification
-    - [cite:@Zhao_2014] manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
+    - [cite:@zhao2014] manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
     - [cite:@webster2015mining] When compared with conventional DNA microarrays, RNA-seq enriches for many additional fragments as it is not restricted to predefined probes and has (in principle) no limitations to dynamic range (Li et al., 2014b; SEQC/MAQC-III Consortium, 2014).
     - - https://www.ncbi.nlm.nih.gov/pubmed/14695316
     - - [[https://www.ncbi.nlm.nih.gov/pubmed/15509548][DASL]]
@@ -1269,8 +1269,8 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
   - [cite:@newman2015]
 - Clinical applications of RNA-seq
   - [cite:@byron2016translating]
-  - [cite:@Kalari_2014]
-  - [cite:@Van_Keuren_Jensen_2014]
+  - [cite:@kalari2014]
+  - [cite:@vankeuren-jensen2014]
 ******* eQTL (expression quantitative trait loci) mapping
 :PROPERTIES:
 :ID:       2CA85A6B-7B1E-4A38-96AA-717847A59168
@@ -1394,7 +1394,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - [cite:@vanDam2018]
+    - [cite:@vandam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
@@ -1570,7 +1570,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - [cite:@vanDam2018]
+    - [cite:@vandam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
