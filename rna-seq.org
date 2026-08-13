@@ -86,7 +86,7 @@
     - low @ low counts b/c Poisson
     - low @ high counts b/c?
   - biological
-    - transcript abundence 10^5-10^7 see [cite:@Griffith_2015] refs 85,86
+    - transcript abundence 10^5-10^7 see Griffith_2015 refs 85,86
   - technical @ platform
     - specialized
       - On target efficiency with bedtools
@@ -94,7 +94,7 @@
     - read depth
     - strandedness problem[[file:org.org_imgs/20170224_132238_567aRU.png]]
   - Strandedness
-    - [cite:@Zhao_2015]
+    - Zhao_2015
 
 ***** Validation
 :PROPERTIES:
@@ -115,7 +115,7 @@
     - RNA exome
     - pico
   - From input to library
-    - [cite:@van_Dijk_2014]
+    - van_Dijk_2014
     - By workflow
       - Isolation
       - Enrichment
@@ -172,7 +172,7 @@
         - tophat fusion documentation http://ccb.jhu.edu/software/tophat/fusion_manual.html
       - STAR for chimeric reads / STAR-Fusion
         - [[https://github.com/STAR-Fusion/STAR-Fusion/wiki][website]]
-        - From [cite:@star_2].5_dobin Chapter 5
+        - From [cite:@star_2.5_dobin] Chapter 5
         - From [cite:@dobin2015mapping] Alternate Protocol 6
           - --chimSegmentMin <N> is minimum allowed length for each of the chimeric segments
         - additional outputs are
@@ -283,8 +283,7 @@ by spike-in  Jiang,L., Schlesinger,F., Davis,C.A., Zhang,Y., Li,R., Salit,M., Gi
 :ID:       E2262D77-424F-4943-8DA4-5649B2F0B4B2
 :END:
 
-[[file:~/Box%20Sync/comp_bio/Anders,15%20HTSeq%20a%20python%20framework%20to%20work%20with%20high%20throughput%20sequencing%20data.pdf][Anders,15 HTSeq a python framework to work with high throughput
-sequencing data]]
+Anders,15 HTSeq a python framework to work with high throughput sequencing data
 
 Not on cluster
 - create R script to run stats on generic output file
@@ -389,7 +388,7 @@ https://haroldpimentel.wordpress.com/2014/05/08/what-the-fpkm-a-review-rna-seq-e
 
 ****** [[http://www-huber.embl.de/HTSeq/doc/count.html#count][website]]
 :PROPERTIES:
-:ID:       6B7F3881-DA7D-4700-BC30-9EF83150D916
+:ID:       6f7f08aa-9259-4248-8921-05b060e33b87
 :END:
 
 htseq-count [options] <alignment_file> <gff_file>
@@ -599,7 +598,7 @@ doi:10.2202/1544-6115.1637.
   - negative binomial
     - [[id:32BB77F2-0283-4A52-86AC-CDF2CB6A7315][edgeR]], dispersion by weighted likelihood
     - [[id:2F642F69-A9C8-46DA-BE31-783AC8D4F4B6][DESeq2]], dispersion by modeling all genes via regression
-- [[id:F9684168-A438-4F5E-81D6-D645B52B4074][limma voom]], voom transforms read count
+- limma voom, voom transforms read count
 - Bayesian
   - BaySeq
   - BitSeq
@@ -832,7 +831,7 @@ https://exrna.org/resources/data/data-quality-control-standards/
 :ID:       71289eeb-a929-44bd-a46e-a0c3dcd7a8f4
 :END:
 - [cite:@wong2019]
-- [cite:@coenen]-stass2018
+- [cite:@coenen-stass2018]
 - [cite:@qiagen2019biofluid_mirna]
 - Truseq small finds more tRNA fragments than other kits [cite:@yeri2018]
 - Bioscientific NextFlex maps more reads to miRNA than other kits [cite:@yeri2018] (~75% vs 65% for truseq in plasma)
@@ -844,10 +843,10 @@ https://exrna.org/resources/data/data-quality-control-standards/
 - library prep - [cite:@wright2019]
 - https://dx.doi.org/10.1186%2Fs12864-018-4726-6
 - https://dx.doi.org/10.1186%2Fs12864-018-4491-6
-- small RNA library preparation [cite:@illumina2016]
+- small RNA library preparation illumina2016
 - kit consistency required- see [cite:@yeri2018] 8b
 - with low input, use same kit for reproducibility [cite:@yeri2018]
-- [cite:@dard]-dascot2018
+- [cite:@dard-dascot2018]
 ****** [[id:3BC41E6A-00D3-4498-A48C-463F68CFD76B][LINK TO Massively parallel sequencing]]
 :PROPERTIES:
 :ID:       6584c294-78b9-42e5-a25b-28a069e112d8
@@ -861,7 +860,7 @@ https://exrna.org/resources/data/data-quality-control-standards/
 - https://link.springer.com/protocol/10.1007%2F978-1-4939-9042-9_4
 ******* Pre-processing
 :PROPERTIES:
-:ID:       0c7d62b9-6ef4-43d1-8e21-c3aa536125bd
+:ID:       619fc2e9-376a-4d0b-a6df-e1be596ecb67
 :END:
 - read filtering
   - adapter trimming
@@ -880,7 +879,7 @@ https://exrna.org/resources/data/data-quality-control-standards/
 - alignment to miRbase needs to be more conservative to avoid mismatches
 ******* QC
 :PROPERTIES:
-:ID:       fc7aeeb1-d387-4379-be37-46ebf1244cd7
+:ID:       309f6304-5aeb-43ae-845c-954bb3b5e18b
 :END:
 https://exrna.org/resources/data/data-quality-control-standards/
 ******* [[id:853dd34c-27be-4be8-9794-19f04a1e22b0][LINK TO Quantification and normalization]]
@@ -1020,9 +1019,9 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4652620/
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6161688/
 - [[id:5d9593fd-f083-450f-a510-449aa15ae670][LINK TO miRNA biology]]
-- [[id:95b3c7f3-3b84-45b1-b8bf-5e2e6e2a6f88][LINK TO miRNA data]]
+- [[id:29ceca16-fe5b-45f7-b59c-51579f34d6a2][miRNA databases]]
 - spike-ins
-  - [cite:@qiagen2018mirnaspike] [cite:@exiqon2016exiseq]
+  - [cite:@qiagen2018miRNAspike] [cite:@exiqon2016exiseq]
   - [cite:@locati2015]
   - https://genome.cshlp.org/content/21/9/1543.long
 - processes
@@ -1129,7 +1128,7 @@ CLOCK: [2021-01-27 Wed 13:53]--[2021-01-27 Wed 13:57] =>  0:04
   - [cite:@graw2015]
   - Past expression tech
     - goals were biomarker discovery and patient stratification
-    - [cite:@Zhao_2014] manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
+    - Zhao_2014 manifests its superiority in terms of the dynamic range, sampling depth, and has independence from pre-existing sequence information [1,2].
     - [cite:@webster2015mining] When compared with conventional DNA microarrays, RNA-seq enriches for many additional fragments as it is not restricted to predefined probes and has (in principle) no limitations to dynamic range (Li et al., 2014b; SEQC/MAQC-III Consortium, 2014).
     - - https://www.ncbi.nlm.nih.gov/pubmed/14695316
     - - [[https://www.ncbi.nlm.nih.gov/pubmed/15509548][DASL]]
@@ -1230,8 +1229,8 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
 :PROPERTIES:
 :ID:       7B9AD35F-1511-4CB2-BB5A-0989EFEAADF3
 :END:
-[[file:~/Box%20Sync/library/Fonseca,14%20RNA%20seq%20gene%20profiling%20a%20systematic%20empirical%20comparison.PDF][Fonseca,14 RNA seq gene profiling a systematic empirical comparison]]
-[[file:~/Box%20Sync/library/Sigurgeirsson,14%20Analysis%20of%20stranded%20information%20using%20an%20automated%20procedure%20for%20strand%20specific%20RNA%20sequencing.pdf][Sigurgeirsson,14 Analysis of stranded information using an automated procedure for strand specific RNA sequencing]]
+Fonseca,14 RNA seq gene profiling a systematic empirical comparison
+[[file:~/library/Sigurgeirsson,14%20Analysis%20of%20stranded%20information%20using%20an%20automated%20procedure%20for%20strand%20specific%20RNA%20sequencing.pdf][Sigurgeirsson,14 Analysis of stranded information using an automated procedure for strand specific RNA sequencing]]
 **** Methods for non-expression analysis
 :PROPERTIES:
 :ID:       8e63e018-e232-49b3-b574-892ea0bb28f0
@@ -1269,8 +1268,8 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
   - [cite:@newman2015]
 - Clinical applications of RNA-seq
   - [cite:@byron2016translating]
-  - [cite:@Kalari_2014]
-  - [cite:@Van_Keuren_Jensen_2014]
+  - Kalari_2014
+  - Van_Keuren_Jensen_2014
 ******* eQTL (expression quantitative trait loci) mapping
 :PROPERTIES:
 :ID:       2CA85A6B-7B1E-4A38-96AA-717847A59168
@@ -1339,6 +1338,7 @@ https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
 :PROPERTIES:
 :ID:       91d46e60-eec3-48c7-97f1-b53eb1559b3f
 :END:
+- https://www.reddit.com/r/bioinformatics/comments/1tuviv2/reducing_go_term_redundancy_for_lollipop_plots/
 - https://www.science.org/doi/10.1126/sciadv.ade2812
 
 https://cran.r-project.org/web/packages/pathfindR/vignettes/intro_vignette.html
@@ -1351,7 +1351,7 @@ https://uclouvain-cbio.github.io/WSBIM2122/sec-gsea.html
 - https://www.sciencedirect.com/science/article/pii/S2666166721004755
 - https://hbctraining.github.io/Training-modules/DGE-functional-analysis/lessons/02_functional_analysis.html
 
-- [cite:@sanchez]-vega2018
+- [cite:@sanchez-vega2018]
 https://www.sciencedirect.com/science/article/pii/S2666166721004755
 https://www.reddit.com/r/bioinformatics/comments/tu61pw/doubt_over_pathway_analysis_approach/
 https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
@@ -1394,7 +1394,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - [cite:@vanDam2018]
+    - [cite:@vandam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
@@ -1482,7 +1482,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 :PROPERTIES:
 :ID:       1139b0a7-32a3-4ccf-8bf2-0266f5e9b2e5
 :END:
-- [cite:@sanchez]-vega2018
+- [cite:@sanchez-vega2018]
 **** Gene regulatory network inference
 :PROPERTIES:
 :ID:       b27fe952-97b2-447b-b97d-08f38d68be87
@@ -1541,7 +1541,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 
 **** Methods and associated tools
 :PROPERTIES:
-:ID:       d11cda99-d3a3-4549-a828-d065c6979c5d
+:ID:       a7fba4be-0e2d-4d6e-8ba4-e831e8dcbc71
 :END:
 - https://maayanlab.cloud/Enrichr/
 - [[id:2CA85A6B-7B1E-4A38-96AA-717847A59168][QTL mapping]]
@@ -1570,7 +1570,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[id:948289d8-3a77-471a-b068-0507285e0bac][wgcna]]
   - wgcna
     - https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
-    - [cite:@vanDam2018]
+    - [cite:@vandam2018]
       #+begin_src bash
     mkdir -p /tmp/wgnca-example
     cd /tmp/wgnca-example/
@@ -1647,7 +1647,7 @@ https://yulab-smu.top/biomedical-knowledge-mining-book/index.html
 - [[https://www.scopus.com/results/citedbyresults.uri?sort=cp-f&cite=2-s2.0-0344464733&src=s&nlo=&nlr=&nls=&imp=t&sid=1aade77c6b42db34d11646993e38a758&sot=cite&sdt=a&sl=0&origin=resultslist&offset=1&txGid=3af857e8bcb60fab910d99917b405130][scopus citing GEDI]]
 **** Time course
 :PROPERTIES:
-:ID:       43f1772e-f8ce-4f6b-a4bd-d35d381b89c9
+:ID:       17f62e36-ff98-4365-85f0-a770e488b748
 :END:
   - [cite:@spies2017]
   - https://support.bioconductor.org/p/65676/#66860
@@ -2164,11 +2164,11 @@ see Love,16 section "Rich visualization and reporting of results"
 
 **** Pipeline Comparisons
 :PROPERTIES:
-:ID:       7B9AD35F-1511-4CB2-BB5A-0989EFEAADF3
+:ID:       417f86ed-4522-461c-9e96-3f2fe59c43a8
 :END:
 
-[[file:~/Box%20Sync/library/Fonseca,14%20RNA%20seq%20gene%20profiling%20a%20systematic%20empirical%20comparison.PDF][Fonseca,14 RNA seq gene profiling a systematic empirical comparison]]
-[[file:~/Box%20Sync/library/Sigurgeirsson,14%20Analysis%20of%20stranded%20information%20using%20an%20automated%20procedure%20for%20strand%20specific%20RNA%20sequencing.pdf][Sigurgeirsson,14 Analysis of stranded information using an automated procedure for strand specific RNA
+Fonseca,14 RNA seq gene profiling a systematic empirical comparison
+[[file:~/library/Sigurgeirsson,14%20Analysis%20of%20stranded%20information%20using%20an%20automated%20procedure%20for%20strand%20specific%20RNA%20sequencing.pdf][Sigurgeirsson,14 Analysis of stranded information using an automated procedure for strand specific RNA sequencing]]
 
 *** Reference                                                           :ref:
 - https://github.com/zhxiaokang/RASflow/blob/master/scripts/dea_genome.R
