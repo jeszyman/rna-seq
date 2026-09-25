@@ -4,6 +4,16 @@
 :header-args: :tangle no :tangle-mode (identity #o555) :mkdirp yes
 :header-args+: :noweb yes
 :END:
+** Plans
+:PROPERTIES:
+:TODO_SET: plans
+:PLANS_SINCE: [2026-09-25 Fri]
+:END:
+*** COMPLETE RNA-seq biopipe module refactor
+:PROPERTIES:
+:ID:       90d164a6-2d08-4b2f-af13-e912d2dde8c4
+:END:
+[[file:docs/superpowers/plans/2026-03-13-rnaseq-biopipe-refactor-plan.md]]
 ** Processes fro analysis of gene expression
 :PROPERTIES:
 :ID:       4c2a51ad-930a-40b9-b074-191a00b3110d
