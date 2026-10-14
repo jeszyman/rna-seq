@@ -1283,7 +1283,7 @@ CLOCK: [2022-06-03 Fri 08:56]--[2022-06-03 Fri 09:31] =>  0:35
 :PROPERTIES:
 :ID:       053daf71-9f9f-4b5e-b400-222c4d24afea
 :END:
-https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
+- https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
 - scopus
 - https://www.nature.com/articles/s41592-019-0548-y
 - https://www.nature.com/articles/s41586-022-05202-1
@@ -1309,6 +1309,24 @@ https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
   - [[file:~/repos/org/career.org::*Zander spatial transcriptomics zoom][Zander spatial transcriptomics zoom]]
 
 
+*** Modern platforms
+
+resolution
+tech
+protein
+
+Imaging/in situ (single-cell to subcellular):
+  - Xenium (10x) — ~250–5,000 gene panels
+  - CosMx (NanoString) — ~1,000-plex to whole-transcriptome (WTx)
+  - MERFISH / Vizgen MERSCOPE — custom panels
+  - Stereo-seq (BGI) — nanoball, subcellular, whole-transcriptome
+
+  Sequencing/capture (spot-based, untargeted):
+  - Visium & Visium HD (10x) — HD ~2 µm bins, near single-cell
+  - GeoMx DSP (NanoString) — region-of-interest, protein + RNA
+  - Slide-seq/Curio — 10 µm beads
+
+
 
  MERFISH2 or SeqFISH3 to averages across cells spanning dozens of micrometers in spot-based protocols such as spatial transcriptomics4. Methods also vary in the number of molecular features acquired: from tens in fluorescence in situ hybridization (FISH), cyclic immunofluorescence (CyCIF)5 and imaging mass cytometry (IMC)6 to hundreds or thousands in specialized probe-based spatial transcriptomics methods (MERFISH2 or SeqFISH3) or imaging mass spectrometry7, and tens of thousands in spot-based spatial transcriptomics, such as Slide-Seq8,9, Visium10, DBiT-seq11 and high-definition spatial transcriptomics (HDST)12. Suc
 
@@ -1325,6 +1343,7 @@ https://www.biorxiv.org/content/10.1101/2023.12.22.572554v1.full
 | HDST        |                             |      |           |            |         |
 | RNAscope    | DNA probe amp               |      |           |            |         |
 | DSP         | Probe cleave to array       | yes  |           |            |         |
+
 *** Expression flux
 :PROPERTIES:
 :ID:       bd5d8a34-80c8-402f-97c4-273a577629ca
